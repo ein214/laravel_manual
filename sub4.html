@@ -1,0 +1,724 @@
+<!--  내장사용자인증 삭제하고 새로구성하기 -->
+<div id="g7" role="tabpanel" class="tab-pane">
+	<h5>[내장 사용자 인증 삭제하고 새로구성하기]</h5>
+	<p>
+		라라벨 자체에 내장된 사용자인증은 메서드가 라라벨 내에 숨겨져있어 수정이 어렵기 때문에<br>
+		삭제하고 로그인, 회원가입 등 직접 작업
+	</p>
+	<div class="col-sm-5">	
+		<pre><code>$ rm -rf resources/views/auth
+$ rm -rf app/Http/Controllers/Auth</code></pre>
+	</div>
+	<p>	
+		<code>$ php artisan make:auth</code> 명령어 실행으로 자동생성됐던 view, controller 파일을 삭제한다
+	</p>
+	<hr>
+	<h5>[라우팅 파일 수정하기]</h5>
+	<ol>
+		<li>기존에 내장라우팅 사용부분 제거</li>
+		<li>
+			회원가입/정보수정, 로그인/로그아웃 부분 라우팅 추가
+		</li>
+	</ol>
+	<div class="col-sm-5">
+		<pre><code class="php">/*사용자인증재구성*/
+//Auth::routes();
+
+/*회원가입*/
+Route::group(['prefix'=>'auth', 'as'=>'user.'], function() {
+	Route::get('register', [
+		'as' 	=> 'create',				//회원가입폼
+		'uses' 	=> 'UsersController@create'
+	]);
+	Route::post('register', [
+		'as' 	=> 'store',					//회원가입DB처리
+		'uses' 	=> 'UsersController@store'
+	]);
+	Route::get('modify', [
+		'as'	=> 'modify',				//회원정보수정폼
+		'uses'	=> 'UsersController@show'
+	]);
+	Route::post('modify', [
+		'as'	=> 'save',					//회원정보업데이트
+		'uses'	=> 'UsersController@save'
+	]);
+});
+
+/*로그인, 로그아웃*/
+Route::group(['prefix'=>'auth', 'as'=>'session.'], function() {
+	Route::get('login', [
+		'as' 	=> 'create',				//로그인폼
+		'uses' 	=> 'SessionsController@create'
+	]);
+	Route::post('login', [
+		'as' 	=> 'store',					//로그인처리
+		'uses' 	=> 'SessionsController@store'
+	]);
+	Route::get('logout', [
+		'as' 	=> 'destroy',				//로그아웃
+		'uses' 	=> 'SessionsController@destroy'
+	]);
+});
+
+Route::get('/login', [
+	'as' 	=> 'login',				//로그인폼
+	'uses' 	=> 'SessionsController@create'
+]);</code></pre>
+		<p>
+			1) <code>Route::group(['prefix'=>'auth', 'as'=>'user.'], function() {</code><br>
+			비슷한 기능을 하는 라우팅끼리 공통된 이름으로 묶어놓기 위해 사용<br>
+			회원가입의 경우 위와같이 묶어놓으면 auth/register, auth/modify 와 같이 앞에 auth가 자동으로 붙어서 라우팅이 생성된다. <br>
+			라우팅 이름고 user.create, user.store, user.moldify, user.save와 같이 앞에 user가 공통으로 붙게됨.
+		</p>
+		<p>
+			2) <code>Route::get('/login', [ ~ </code>
+			게시판에서 auth미들웨어를 사용하는데 내장 사용자인증기능을 제거하게되면 <br>
+			글작성 페이지 클릭 시 login 라우트가 없음으로 인해 오류가 발생한다. <br>
+			오류가 발생하는 파일을 수정하기에는 경로가 복잡하므로 라우팅 파일에 이름이 login 인 라우팅을 추가
+		</p>
+	</div>
+	<hr>
+	<h5>[컨트롤러 파일 생성]</h5>
+	<div class="col-sm-5">
+		<pre><code>$ php artisan make:controller UsersController
+$ php artisan make:controller SessionsController
+</code></pre>
+	</div>
+	<hr>	
+	<h5>[메뉴링크 수정]</h5>
+	<p>
+		현재 생성되있는 app.blade.php 파일은 라라벨 내장 사용자인증에서 쓰던 링크로 되어있으므로 새로 생성한 라우팅에 맞게 수정
+		<br><span class="text-danger">* 여기까지 하고 새로고침해도 오류남. 아직 블레이드 파일들이 없기때문에</span>
+	</p>
+	<div class="col-sm-8">
+		<pre><code class="html">&lt;!-- Right Side Of Navbar --&gt;
+&lt;ul class="navbar-nav ml-auto"&gt;
+    &lt;!-- Authentication Links --&gt;
+    @guest
+        &lt;li&gt;&lt;a class="nav-link" href="{{ route('session.create') }}"&gt;로그인&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a class="nav-link" href="{{ route('user.create') }}"&gt;회원가입&lt;/a&gt;&lt;/li&gt;
+    @else
+        &lt;li class="nav-item dropdown"&gt;
+            &lt;a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre&gt;
+                {{ Auth::user()-&gt;name }} &lt;span class="caret"&gt;&lt;/span&gt;
+            &lt;/a&gt;
+
+            &lt;div class="dropdown-menu" aria-labelledby="navbarDropdown"&gt;
+                &lt;a class="dropdown-item" href="{{ route('session.destroy') }}"&gt;로그아웃&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/li&gt;
+    @endguest
+&lt;/ul&gt;</code></pre>
+	</div>
+</div>
+
+<!-- 회원가입 -->
+<div id="g7_1" role="tabpanel" class="tab-pane">
+	<h5>[회원가입 블레이드 파일 만들기]</h5>
+	<p>
+		<button class="btn btn-info" data-toggle="collapse" data-target="#g7_1_collapse" aria-expanded="false" aria-controls="g7_1_collapse">views/auth/create.blade.php <span class="badge badge-light">확인</span> 
+		</button>
+	</p>
+
+	<div class="collapse col-sm-10" id="g7_1_collapse">
+		<pre><code class="html">@extends ('layouts.app')
+
+@section('content')
+&lt;div class="container col-sm-4"&gt;
+	&lt;div class="card"&gt;
+		&lt;div class="card-header text-white bg-dark "&gt;
+			회원가입
+		&lt;/div&gt;
+		&lt;div class="card-body"&gt;
+			&lt;form action="{{ route('user.store') }}" method="post"&gt;
+				@csrf
+				&lt;div class="form-group"&gt;
+					&lt;label for="name"&gt;이름&lt;/label&gt;
+					&lt;input type="text" name="name" id="name" class="form-control {{ ($errors-&gt;has('name')) ? 'is-invalid' : '' }}" required value="{{ old('name') }}"/&gt;
+					{!! $errors-&gt;first('name', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}
+				&lt;/div&gt;
+				&lt;div class="form-group"&gt;
+					&lt;label for="email"&gt;이메일&lt;/label&gt;
+					&lt;input type="text" name="email" id="email" class="form-control {{ ($errors-&gt;has('email')) ? 'is-invalid' : '' }}" required value="{{ old('email') }}"/&gt;
+					{!! $errors-&gt;first('email', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}
+				&lt;/div&gt;
+				&lt;div class="form-group"&gt;
+					&lt;label for="password"&gt;비밀번호&lt;/label&gt;
+					&lt;input type="password" name="password" id="password" class="form-control {{ ($errors-&gt;has('password')) ? 'is-invalid' : '' }}" required /&gt;
+					{!! $errors-&gt;first('password', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}
+				&lt;/div&gt;
+				&lt;div class="form-group"&gt;
+					&lt;label for="password_confirmation"&gt;비밀번호확인&lt;/label&gt;
+					&lt;input type="password" name="password_confirmation" id="password_confirmation" class="form-control {{ ($errors-&gt;has('password_confirmation')) ? 'is-invalid' : '' }}" required /&gt;
+					{!! $errors-&gt;first('password_confirmation', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}
+				&lt;/div&gt;
+				&lt;div class="form-group text-center"&gt;
+					&lt;button type="submit" class="btn btn-warning btn-lg btn-block"&gt;등록하기&lt;/button&gt;
+				&lt;/div&gt;
+			&lt;/form&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+@endsection</code></pre>
+	</div>
+	<hr>
+	<h5>[컨트롤러 수정]</h5>
+	<ol>
+		<li>
+			생성한 회원가입 블레이드 파일을 보여주기 위해 create 메소드 수정
+			<div class="col-sm-3">
+				<pre><code class="php">public function create() {
+	return view('auth.create');
+}</code></pre>				
+			</div>
+		</li>
+		<li>
+			회원가입 DB처리 로직인 store 메소드 수정
+			<div class="col-sm-5">
+				<pre><code class="php">public function store(Request $request) {
+	//유효성체크
+	$this->validate($request, [
+		'name'	=> 'required|max:255',
+		'email'	=> 'required|max:255|unique:users',
+		'password'	=> 'required|confirmed|min:6'
+   	]);
+
+   	//DB추가
+   	$user = \App\User::create([
+   		'name' 	=> $request->input('name'),
+   		'email'	=> $request->input('email'),
+   		'password'	=> bcrypt($request->input('password'))
+   	]);
+
+   	auth()->login($user);
+   	flash('회원가입이 완료되었습니다.');
+
+   	return redirect('home');
+}</code></pre>
+			</div>
+		</li>
+	</ol>
+</div>
+
+<!-- 정보수정 기능 추가-->
+<div id="g7_2" role="tabpanel" class="tab-pane">
+	<h5>[회원정보수정기능 추가]</h5>
+	<p class="text-primary">
+		<ol class="sub_con_list">
+			<li>
+				views/layouts/app.blade.php 파일 내 Logout 메뉴 위 정보수정 메뉴 추가					
+				<div class="col-sm-5">
+					<pre><code class="html">&lt;div class="dropdown-menu" aria-labelledby="navbarDropdown"&gt;
+	&lt;!-- 정보수정 --&gt;
+	&lt;a class="dropdown-item" href="{{ route('user.modify') }}"&gt;회원정보수정&lt;/a&gt;
+	&lt;!-- 정보수정 --&gt;
+
+	&lt;a class="dropdown-item" href="{{ route('session.destroy') }}"&gt;로그아웃&lt;/a&gt;</code></pre>					
+				</div>
+			</li>			
+			<li>
+				회원정보 수정을 위한 뷰페이지 생성
+				- views/auth/modify.blade.php 해당경로로 파일 생성
+				<div class="col-sm-11">
+<pre><code class="html">{{--마스터 레이아웃 호출--}}
+@extends('layouts.app')
+
+{{--section으로 감싸면 app.blade.php 파일 내 yield('content') 부분에 호출됨--}}
+@section('content')
+&lt;div class="container"&gt;
+	&lt;div class="row justify-content-center"&gt;
+		&lt;div class="col-md-8"&gt;
+			&lt;div class="card"&gt;
+				&lt;div class="card-header"&gt;회원정보수정&lt;/div&gt;
+				&lt;div class="card-body"&gt;
+					&lt;!-- 정보수정 버튼 클릭 시 라우팅 파일에 이름이 as부분이 modify.save인 라우팅으로 이동 --&gt;
+					&lt;form action="{{ route('user.save') }}" method="POST"&gt;
+					&lt;!-- 모든 폼전송 시 필수값 --&gt;
+					@csrf
+					&lt;input type="hidden" name="id" value="{{ $user-&gt;id }}" /&gt;
+					&lt;div class="form-group row"&gt;
+						&lt;label for="name" class="col-md-4"&gt;이름&lt;/label&gt;
+						&lt;div class="col-md-6"&gt;
+							&lt;input type="text" name="name" id="name" value="{{ $user-&gt;name }}" class="form-control {{ $errors-&gt;has('name') ? ' is-invalid' : '' }}" required/&gt;
+							{!! $errors-&gt;first('name', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}
+						&lt;/div&gt;
+					&lt;/div&gt;
+					&lt;div class="form-group row"&gt;
+						&lt;label for="password" class="col-md-4"&gt;비밀번호&lt;/label&gt;
+						&lt;div class="col-md-6"&gt;
+							&lt;input type="password" name="password" id="password" class="form-control {{ $errors-&gt;has('password') ? ' is-invalid' : '' }}" placeholder="비밀번호" required/&gt;
+							{!! $errors-&gt;first('password', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}
+						&lt;/div&gt;
+					&lt;/div&gt;
+					&lt;div class="form-group row"&gt;
+						&lt;label for="password_confirmation" class="col-md-4"&gt;비밀번호확인&lt;/label&gt;
+						&lt;div class="col-md-6"&gt;
+							&lt;input type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="비밀번호확인" required/&gt;
+							{!! $errors-&gt;first('password', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}
+						&lt;/div&gt;
+					&lt;/div&gt;
+					&lt;div class="text-center"&gt;
+						&lt;button type="submit" class="btn btn-primary"&gt;정보수정&lt;/button&gt;
+					&lt;/div&gt;
+					&lt;/form&gt;
+				&lt;/div&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+@endsection</code></pre>
+				</div>
+			</li>
+			<li>
+				회원정보수정 블레이드 파일 보여주기 위해 show 메소드 수정
+				<div class="col-sm-3">
+					<pre><code class="php">public function show() {
+	$user = auth()->user();
+	return view('auth.modify', compact('user'));
+}</code></pre>
+					
+				</div>
+				<p>	
+					1) <code>$user = auth()->user();</code><br>
+					현재 로그인한 사용자의 정보를 가져와서 user 변수에 저장. <br>
+					뷰페이지에 함께 전달한다.
+				</p>
+			</li>
+			<li>	
+				회원정보 수정 DB처리 함수인 save 메소드 수정
+				<div class="col-sm-5">
+					<pre><code class="php">public function save(Request $request) {
+	/*유효성체크*/
+	$rules = [
+		'name'		=> ['required', 'max:255'],
+		'password'	=> ['required', 'min:6', 'confirmed']
+	];
+
+	$messages = [
+		'name.required'			=> '이름은 필수입력입니다.',
+		'name.max'				=> '최대 255자까지 입력가능합니다.',
+		'password.required'		=> '비밀번호는 필수 입력입니다.',
+		'password.min'			=> '비밀번호는 최소 :min글자 이상이 필요합니다.',
+		'password.confirmed'	=> '비밀번호를 확인해주세요.'
+	];
+
+	$validator = \Validator::make($request->all(), $rules, $messages);
+
+	//유효성체크 후 조건 안 맞으면 다시 이전페이지
+	if($validator->fails()) {
+		return back()->withErrors($validator)->withInput();
+	}
+
+	$user = \App\User::whereId($request->input('id'))->first();
+	$user->update([
+		'name'		=> $request->input('name'),
+		'password'	=> bcrypt($request->input('password'))
+	]);
+
+	return redirect('/home');
+}</code></pre>
+				</div>
+				<p>
+					1) <code>$rules ~ </code><br>	
+					유효성 체크를 위한 규칙<br>
+					서버단에서 한번 더 체크하기 위해서 유효성 체크 규칙을 선언하는 부분
+				</p>
+				<p>	
+					2) <code>$messages ~ </code><br>	
+					위에서 체크한 규칙을 기준으로 규칙에 맞지 않을 때 나타낼 메시지를 선언하는 부분
+				</p>
+				<p>	
+					3) <code>$validator = \Validator::make($request->all(), $rules, $messages);</code><br>
+					Validator 인스턴스를 이용해서 위에서 미리 만들어놓은 $rules, $message를 가지고 유효성 체크<br>
+					<code>\Validator::make([유효성체크대상배열], '[유효성 체크 규칙]', '[규칙에 안맞을 경우 노출시킬 메시지]');</code>
+				</p>
+			</li>
+		</ol>
+	</p>
+</div>
+
+<!-- 유효성 체크방법 -->
+<div id="g7_etc" role="tabpanel" class="tab-pane">
+	<h5>[서버단 유효성 체크방법 3가지]</h5>
+	<ol>
+		<li>Validator 인스턴스를 직접만들어서 이용 (글작성, 회원정보수정에서 사용했던 예제)
+			<div class="col-sm-5">
+				<pre><code class="php">/*유효성체크*/
+$rules = [
+    'name'      => ['required', 'max:255'],
+    'password'  => ['required', 'min:6', 'confirmed']
+];
+
+$messages = [
+    'name.required'         => '이름은 필수입력입니다.',
+    'name.max'              => '최대 255자까지 입력가능합니다.',
+    'password.required'     => '비밀번호는 필수 입력입니다.',
+    'password.min'          => '비밀번호는 최소 :min글자 이상이 필요합니다.',
+    'password.confirmed'    => '비밀번호를 확인해주세요.'
+];
+
+$validator = <span class="text-info">\Validator::make($request->all(), $rules, $messages);</span></code></pre>
+			</div>
+		</li>
+		<li>컨트롤러에서 기본으로 사용할 수 있는 <code>validate()</code>메소드를 이용 (회원가입에서 사용했던 예제)
+			<div class="col-sm-5">
+				<pre><code class="php">//유효성체크
+$this->validate($request, [
+    'name'  => 'required|max:255',
+    'email' => 'required|max:255|unique:users',
+    'password'  => 'required|confirmed|min:6'
+]);</code></pre>
+			</div>
+		</li>
+		<li>
+			FormRequest 파일을 따로 만들어서 사용하는 방법<br>
+			1,2번처럼 컨트롤러 내부에서 사용하는 방식이 아닌 Request 파일을 별도로 생성해놓고 그 파일내에서 제어하는 방법<br><br>
+			<span class="text-info">* 글작성 시 사용한 유효성 체크방식을 FormRequest 방식으로 변경하는 방법</span><br>
+			- 기존방식<br>
+			<div class="col-sm-5">
+				<pre><code class="php">/*유효성체크*/
+$rules = [
+    'title'      => ['required', 'max:255'],
+    'content'  => ['required', 'min:5']
+];
+
+$messages = [
+    'title.required'         => '제목은 필수입력입니다.',
+    'title.max'              => '최대 255자까지 입력가능합니다.',
+    'content.required'     => '내용은 필수입력입니다.',
+    'content.min'          => '내용 최소 :min글자 이상이 필요합니다.'
+];
+
+$validator = \Validator::make($request->all(), $rules, $messages);
+
+//유효성체크 후 조건 안 맞으면 다시 이전페이지
+if($validator->fails()) {
+    return back()->withErrors($validator)->withInput();
+}</code></pre>
+			</div>
+			<br>
+			- FormRequest 방식으로 변경<br>
+			<ol>
+				<li>
+					FormRequest 파일 생성
+					<div class="col-sm-5">
+						<pre><code>$ php artisan make:request BoardsRequest</code></pre>
+					</div>
+				</li>
+				<li>
+					기존에 사용한 $rules, $message 부분을 생성된 Request파일의 각각의 메소드로 복사
+					<div class="col-sm-5">
+						<pre><code class="php">namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class BoardsRequest extends FormRequest
+{
+    protected $dontFlash = ['files'];
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'title'     => ['required', 'max:255'],
+            'content'   => ['required', 'min:5'],
+            'files'     => ['mimes:jpb,png,zip,tar', 'max:30000']
+        ];
+    }
+
+    public function messages() {
+        return [
+            'required'  => ':attribute은 필수입력입니다.',
+            'min'       => ':attribute는 최소 :min글자 이상이 필요합니다.'
+        ];
+    }
+
+    public function attributes() {
+        return [
+            'title'     => '제목',
+            'content'   => '내용'
+        ];
+    }
+}</code></pre>
+					</div>
+					<p>
+						1) <code>protected $dontFlash = ['files'];</code><br>
+						유효성 체크로 인해 실패 시 다시 이전페이지로 이동되는데 그때 첨부파일에 대한 정보는 제외시키고 이동되도록 하는 변수. <br>배열안에 필드명을 추가하면 해당필드명은 이전페이지 이동 시 저장되지않는다.
+					</p>
+					<p>
+						2) <code>function authorize()</code><br>
+						유효성 체크 사용여부를 선언하는 부분 <code>return true;</code> 로 선언 시 사용 <code>false</code>일 경우 미사용으로 유효성체크를 안 하고 넘어간다
+					</p>
+				</li>
+				<li>
+					기존 컨트롤러에서 유효성체크에 대한 부분은 전부 지우고, store function 파라미터를 변경<br>
+					이미 유효성체크가 끝난 배열만 가지고 DB처리를 하게된다.
+					<div class="col-sm-5">
+						<pre><code class="php">public function store(BoardsRequest $request)</code></pre>
+					</div>
+				</li>
+			</ol>			
+		</li>
+	</ol>
+</div>
+
+<!-- 유효성 체크방법 -->
+<div id="g7_3" role="tabpanel" class="tab-pane">
+	<h5>[로그인]</h5>
+		<ol>
+			<li>
+				로그인 블레이드 파일 만들기
+				<div class="col-sm-9">
+					<pre><code class="html">@extends ('layouts.app')
+
+@section('content')
+&lt;div class="container col-sm-4"&gt;
+    &lt;div class="card"&gt;
+        &lt;div class="card-header text-white bg-dark "&gt;
+            로그인
+        &lt;/div&gt;
+        &lt;div class="card-body"&gt;
+            &lt;form action="{{ route('session.store') }}" method="post"&gt;
+                @csrf
+                &lt;div class="form-group"&gt;
+                    &lt;label for="email"&gt;이메일&lt;/label&gt;
+                    &lt;input type="text" name="email" id="email" class="form-control {{ ($errors-&gt;has('email')) ? 'is-invalid' : '' }}" required value="{{ old('email') }}"/&gt;
+                    {!! $errors-&gt;first('email', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}
+                &lt;/div&gt;
+                &lt;div class="form-group"&gt;
+                    &lt;label for="password"&gt;비밀번호&lt;/label&gt;
+                    &lt;input type="password" name="password" id="password" class="form-control {{ ($errors-&gt;has('password')) ? 'is-invalid' : '' }}" required /&gt;
+                    {!! $errors-&gt;first('password', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}
+                &lt;/div&gt;
+                &lt;div class="form-group text-center"&gt;
+                    &lt;button type="submit" class="btn btn-warning btn-lg btn-block"&gt;로그인&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+@endsection</code></pre>
+				</div>
+			</li>
+			<li>
+				로그인 페이지를 보여줄수 있도록 컨트롤러 파일 수정<br>
+				<div class="col-sm-5">
+					<pre><code class="php">public function create() {
+    return view('auth.login');
+}</code></pre>
+				</div>
+			</li>
+			<li>
+				로그인 처리 로직 작업
+				<div class="col-sm-5">
+					<pre><code class="php">public function store(Request $request) {
+    $this->validate($request, [
+        'email' => 'required|email',
+        'password' => 'required|min:6'
+    ]);
+
+    if(!auth()->attempt($request->only('email', 'password'))) {
+        flash('이메일 또는 비밀번호가 맞지않습니다.');
+        return back()->withInput();
+    }
+    flash('로그인 되었습니다.');
+    return redirect('home');
+}</code></pre>
+				</div>
+				<p>
+					1) <code>if(!auth()->attempt($request->only('email', 'password'))) {</code><br>
+					폼에서 넘어온 email, password 값 두개만 가져와서 로그인 시도<br>
+					실패 시 이전페이지로 넘어가고 성공 시 로그인처리까지 자동으로 된 뒤 다음으로 넘어감 
+				</p>
+			</li>
+		</ol>
+	<hr>
+	<h5>[로그아웃]</h5>
+	로그아웃은 별도 블레이드페이지 없이 컨트롤러에서 바로 처리
+	<div class="col-sm-5">
+		<pre><code class="php">public function destroy() {
+    auth()->logout();
+    flash('로그아웃되었습니다.');
+
+    return redirect('home');
+}</code></pre>		
+	</div>
+</div>
+
+<!-- 이벤트 메일보내기  -->
+<div id="g7_4" role="tabpanel" class="tab-pane">
+	<div class="col-sm-7">
+		<div class="alert alert-danger">
+			<h5>[이벤트]</h5>
+			<span class="text-primary">* <a href="https://laravel.kr/docs/5.6/events" target="_blank">이벤트</a></span><br>
+			컨트롤러내에서 무겁고 시간이 걸리는 작업은 이벤트로 별도 분리해서 빠른 응답을 제공하도록 하는 것<br>
+			ex) smtp로 이메일 발송, 외부api를 연결하여 데이터를 가져오거나 파일시스템으로 큰파일을 읽어오는 등 <br>
+			이벤트를 사용하겠다 알려주는게 이벤트 채널이고, 그걸 받아서 처리하는게 이벤트 리스너 <br>
+			채널과 리스트를 각각 생성해도 상관없고 이벤트레지스트리파일에다 채널과 리스너를 적고 두개파일을 한번에 생성해도 된다. 
+			<hr>
+			<h5>[메일발송함수]</h5>
+			<code>\Mail::send('[이메일 내용 블레이드파일]', '[이메일내용에 필요한 변수]', '[이메일 발송 처리로직]')</code><br>
+			첫번째 인자는 메일발송 시 내용에 해당하는 템플릿이 들어가는 블레이드 파일,<br>
+			두번째 인자는 메일템플릿 내 변수가 들어간다면 해당 변수를 같이 보내주는 것이고(보통 이벤트 채널 호출 시 보낸 변수가 쓰임),<br>
+			세번째 인자는 메일 발송되는 처리로직이다.세번째 함수 안에서 받는 사람, 보내는 사람, 제목을 선언함. <br>
+			예제에서는 이벤트 리스너 파일 안에 있어서 \Mail 이라고 썼지만 컨트롤러나 라우터에서 쓸 때는 \ 를 빼야함.
+		</div>
+	</div>	
+
+	<h5>[회원가입 완료 시 메일발송하기]</h5>
+	<ol>
+		<li>회원가입 메소드 안에 새로운 이벤트시스템 추가
+			<div class="col-sm-5">
+				<pre><code class="php">public function store(Request $request) {
+    ...
+
+    auth()->login($user);
+    flash('회원가입이 완료되었습니다.');
+	
+    /* 이벤트 시스템 추가*/
+    <b>event(new \App\Events\UserCreated($user));</b>
+    /* 이벤트 시스템 추가*/
+
+    return redirect('home');
+}</code></pre>
+			</div>
+		</li>
+		<li>
+			이벤트를 등록하는 레지스트리 파일인 app/Providers/EventServiceProvider.php 파일내에  이벤트 채널과 이벤트 리스너 등록
+			<div class="col-sm-5">
+				<pre><code class="php">protected $listen = [
+    'App\Events\Event' => [
+        'App\Listeners\EventListener',
+    ],
+    <b class="text-danger">'App\Events\UserCreated' => ['App\Listeners\UserCreatedListener']</b>
+];</code></pre>
+			</div>
+		</li>
+		<li>
+			이벤트 레지스트리에 등록된 이벤트채널, 이벤트 리스너 뼈대코드를 한번에 생성
+			<div class="col-sm-5">
+				<pre><code>$ php artisan event:generate</code></pre>
+			</div>
+			각각 따로 등록해도 상관없음. 
+			<div class="col-sm-5">
+				<pre><code>$ php artisan make:event UserCreated
+$ php artisan make:listener UserCreatedListener</code></pre>
+			</div>
+		</li>
+		<li>
+			이벤트 채널 파일에서 store 메소드에서 이벤트 시스템 추가 시 보낸 user 객체를 받아오도록 추가<br>해당 객채를 받아와야 리스너파일에서도 사용할 수 있음.
+			<div class="col-sm-5">
+				//app/Events/UserCreated.php
+				<pre><code class="php">class UserCreated
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public $user;
+    /**
+     * Create a new event instance.
+     *
+     * @return void
+     */
+    public function __construct(\App\User $user)
+    {
+        $this->user = $user;
+    }</code></pre>
+			</div>
+		</li>
+		<li>
+			이벤트 리스트 파일에서 메일발송부분 작업
+			<div class="col-sm-5">
+				<pre><code class="php">namespace App\Listeners;
+
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class UserCreatedListener
+{
+    /**
+     * Create the event listener.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Handle the event.
+     *
+     * @param  object  $event
+     * @return void
+     */
+    public function handle(\App\Events\UserCreated $event)
+    {
+        $user = $event->user;
+
+        \Mail::send(
+            'emails.users.created',
+            compact('user'),
+            function ($message) use ($user) {
+                $message->to($user->email);
+                $message->subject('회원가입을 환영합니다.');
+            }
+        );
+    }
+}</code></pre>
+			</div>
+			<p>
+				1) <code>public function handle(\App\Events\UserCreated $event)</code><br>
+				리스너파일에서 동작하는 이벤트부분은 모두 handle 메소드에서 처리	<br>
+				파라미터 부분은 이벤트 채널에서 가져오도록 변경해준다.			
+			</p>
+			<p>
+				2) <code>$user = $event->user;</code><br>
+				이벤트채널에서 <code>$this->user = $user;</code>로 user 객체를 저장했기때문에 <code>$event</code> 안에 있는 user객체를 다시 불러와서 <code>$user</code> 변수로 저장
+			</p>
+			<p>
+				3) <code>\Mail::send( ~ </code><br>
+				라라벨 내에서 메일발송 시 사용하는 함수. 아래와 같이 3가지 파라미터가 들어간다.<br>
+				<code>\Mail::send('[이메일 내용 블레이드파일]', '[이메일내용에 필요한 변수]', '[이메일 발송 처리로직]')</code>
+			</p>
+			<p>
+				4) <code>function ($message) use ($user)</code><br>
+				두번째 파라미터에 있는 외부변수를 처리로직 function안에서 사용 할 수 있도록 use ($user) 로 가져오는 것
+			</p>
+		</li>
+		<li>
+			이메일 발송에 사용할 블레이드파일 작성
+			<div class="col-sm-4">
+				<pre><code class="html">//views/emails/users/created.blade.php
+{{ $user->name }}님 환영합니다.
+{{ config('app.name') }} 사이트에 가입되었습니다.</code></pre>
+			</div>
+		</li>
+		<li>
+			이메일발송을 위해서 .env 파일 내 설정변경해주기 (gmail을 이용하여 발송하는 경우)
+			<div class="col-sm-4">
+				<pre><code>MAIL_DRIVER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=[계정]
+MAIL_PASSWORD=[비밀번호]
+MAIL_ENCRYPTION=tls</code></pre>
+			</div>
+			gmail 이용하여 발송 시 구글계정 설정변경이 필요하다.<br>
+			<span class="text-info">내계정 > 기기 활동 및 보안 관련 활동 > 보안수준이 낮은 앱 허용값을 사용으로 변경</span>
+		</li>
+
+	</ol>
+</div>

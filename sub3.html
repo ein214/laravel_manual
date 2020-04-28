@@ -1,0 +1,553 @@
+<!-- 플래시 메시지 추가 -->
+<div id="g6_1" role="tabpanel" class="tab-pane">
+	<h5>[다듬기, 기능추가 - 플래시메시지추가]</h5>
+	<img src="assets/img/21.PNG" alt="">
+
+	<ol class="mt-5">
+		<li>
+			콘솔창에서 laracasts/flash 패키지 설치
+			<div class="col-sm-5">
+				<pre><code>$ composer require laracasts/flash</code></pre>
+			</div>
+			* laracasts/flash : <a href="https://packagist.org/packages/laracasts/flash" target="_blank">https://packagist.org/packages/laracasts/flash</a>
+		</li>
+		<li class="mt-3">
+			설치한 패키지 파일을 사용하기 위해서 config/app.php 파일에 패키지 추가
+			<div class="col-sm-5">
+<pre><code class="php">'providers' => [
+    Laracasts\Flash\FlashServiceProvider::class,
+];
+
+'aliases' => [
+	'Flash' => Laracasts\Flash\FlashServiceProvider\Flash::class,
+];</code></pre>
+			</div>
+		</li>
+		<li class="mt-3">
+			BoardsController내 store, update 두개함수 맨 마지막 페이지 이동전에 flash 함수 추가
+			<div class="col-sm-5">
+				<pre><code class="php">//function store
+flash('글 작성이 완료되었습니다.');
+return redirect(route('boards.index'));</code></pre>
+			</div>
+			<div class="col-sm-5">
+				<pre><code class="php">//function update
+flash('글 수정이 완료되었습니다.');
+return redirect(route('boards.show', $board->id));</code></pre>
+			</div>
+		</li>
+		<li class="mt-3">
+			위 함수들에서 사용한 flash함수로 인해 메시지 내용이 세션에 저장되고, <br>
+			저장된 메시지는 모든 페이지에서 쓸 수 있으니 마스터 레이아웃인 app.blade.php에서 사용하도록 추가한다. 
+			<div class="col-sm-5">
+				<pre><code class="html">&lt;main class="py-4"&gt;
+    &lt;div class="container"&gt;
+        <span class="text-danger">@include('flash::message')</span>
+    &lt;/div&gt;
+    
+    @yield('content')
+&lt;/main&gt;</code></pre>			
+			</div>
+		</li>
+	</ol>
+</div>
+
+<!-- CSS, JS통합 / Font-awesome 추가 -->
+<div id="g6_2" role="tabpanel" class="tab-pane">
+	<div class="col-sm-7">
+		<div class="alert alert-danger">
+			<h5>[Laravel Mix]</h5>
+			라라벨은 Laravel Mix라는 기능을 제공해서 여러개 CSS, JS파일들을 하나로 통합해서 한파일로 관리 할 수 있다. <br>
+			꼭 써야하는건 아니고 jquery 추가하듯이 cdn 주소로 app.blade.php 파일 상단에다 추가해도 상관없음. <br>
+			라라벨 믹스를 사용하기 위해서는 <a href="https://nodejs.org/en/" target="_blank">node js</a> 설치가 필요함. <br><br>
+
+			라라벨 믹스를 이용하는 경우에는 resources/assets 폴더 안에 css와 js 파일을 수정하고 콘솔창에서 라라벨 믹스를 실행하여 업데이트 내용을 반영하고 <br>
+			사용하지 않는 경우에는 public 폴더 안의 css/js 파일을 수정하면 된다. <br><br>
+
+			라라벨 믹스 사용 시 외부 jquery 소스를 이용하는 경우 composer를 이용하여 설치한 후 webpack.min.js 파일 내 외부 jquery css파일과 js 파일을 추가한 후 <br>
+			콘솔에서 <code>$ npm run dev</code> 를 실행하면 webpack.min.js 파일이 실행되어 파일이 통합된다. 
+		</div>
+	</div>
+	<h5>[다듬기, 기능추가 - (프론트엔드 빌드) CSS, JS 통합 / Font-awesome 추가]</h5>
+	<h5>Laravel Mix로 파일 통합하고 font-awesome 사용하기</h5>
+
+	<ol>
+		<li>
+			Laravel Mix 설치하기
+			<div class="col-sm-5"><pre><code>$ npm install</code></pre></div>
+		</li>
+		<li class="mt-3">
+			Font Awesome 설치하기
+			<div class="col-sm-5"><pre><code>$ npm install font-awesome --save-dev</code></pre></div>
+		</li>
+		<li class="mt-3">
+			resources/assets/sass/app.scss 파일 내 설치된 font awesome css파일 추가
+			<div class="col-sm-5">
+				<pre><code class="scss">// resources/assets/sass/app.scss
+// Font Awesome
+@import 'node_modules/font-awesome/scss/font-awesome';</code></pre>
+			</div>
+		</li>
+		<li class="mt-3">
+			Node_modules폴더 안에 설치된 font-awesome 폰트 파일을 public/fonts 폴더로 복사하도록 명령어 추가 (webpack.min.js)
+			<div class="col-sm-6">
+				<pre><code class="javascript">mix.js('resources/assets/js/app.js', 'public/js')		//resources 폴더 내 app.js 파일을 public/js파일로 통합
+   .sass('resources/assets/sass/app.scss', 'public/css');	//resources 폴더 내 app.scss 파일을 public/css파일로 통합
+
+mix.copy('node_modules/font-awesome/fonts', 'public/fonts');	// node_modules 폴더 내 폰트파일을 public/fonts 폴더로 복사</code></pre>
+			</div>
+		</li>
+		<li class="mt-3"> 
+			콘솔창에서 Laravel mix 실행<br>
+			해당 명령어를 실행하면 위에서 수정한 webpack.min.js 파일이 실행된다.
+			<div class="col-sm-5"><pre><code>$ npm run dev</code></div>
+		</li>
+		<li class="mt-3">
+			폰트어썸 아이콘 css가 app.css파일로 통합되었기 때문에 별도 cdn 추가없이 바로 사용할 수 있다. <br>
+			- 글작성 페이지 내 버튼들 아이콘 추가
+			<div class="col-sm-5">
+				<pre><code class="html">&lt;div class="form-group text-center"&gt;
+    &lt;button type="submit" class="btn btn-primary"&gt;<span class="text-danger">&lt;i class="fa fa-pencil"&gt;&lt;/i&gt;</span> 등록하기&lt;/button&gt;
+    &lt;a href="{{ route('boards.index') }}" class="btn btn-info"&gt;<span class="text-danger">&lt;i class="fa fa-bars"&gt;&lt;/i&gt;</span> 목록&lt;/a&gt;
+&lt;/div&gt;</code></pre>
+			</div>			
+			<img src="assets/img/22.PNG" alt="">
+		</li>
+	</ol>
+</div>
+
+<!-- 검색창 추가  -->
+<div id="g6_3" role="tabpanel" class="tab-pane">
+	<h5>[검색창 추가]</h5>
+	<ol>
+		<li>
+			검색창 조각뷰 만들기<br>
+			<p>
+				<button class="btn btn-info" data-toggle="collapse" data-target="#g6_3_collapse" aria-expanded="false" aria-controls="g6_3_collapse">
+    			/views/boards/search.blade.php <span class="badge badge-light">확인</span> 
+  				</button>
+  			</p>
+
+  			<div class="collapse col-sm-9" id="g6_3_collapse">			  
+			   <pre class="pre-scrollable">
+<code class="html">&lt;form action="{{ route('boards.index') }}" method="get"&gt;
+    &lt;div class="input-group"&gt;
+        &lt;div class="input-group-prepend"&gt;
+            &lt;button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="search_select"&gt;전체&lt;/button&gt;
+            &lt;div class="dropdown-menu" id="search_dropdown"&gt;
+              &lt;a class="dropdown-item" href="#" data-id="both"&gt;전체&lt;/a&gt;
+              &lt;a class="dropdown-item" href="#" data-id="title"&gt;제목&lt;/a&gt;
+              &lt;a class="dropdown-item" href="#" data-id="content"&gt;내용&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;input type="hidden" name="q_cate" id="q_cate" value="{{ Request::input('q_cate') }}"&gt;
+        &lt;input type="hidden" name="q_cate_txt" id="q_cate_txt" value="{{ Request::input('q_cate_txt') }}"&gt;
+        &lt;input type="text" class="form-control" placeholder="검색어" aria-label="Keyword" aria-describedby="basic-addon2" name="q" value="{{ Request::input('q') }}"&gt;
+        &lt;div class="input-group-append"&gt;
+            &lt;button class="btn btn-outline-secondary" type="submit"&gt;&lt;i class="fa fa-search"&gt;&lt;/i&gt; 검색&lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;  
+&lt;/form&gt;</code><code class="jquery">
+@section('script')
+    @parent
+    &lt;script&gt;
+    $(function() {
+        $("#search_dropdown &gt; a").click(function() {
+            var text = $(this).data("id");
+            var text_str = $(this).text();
+
+            $("#q_cate").attr("value", text);
+            $("#search_select").text(text_str);
+            $("#q_cate_txt").val(text_str);         
+        });
+
+        var type_chk = $("#q_cate_txt").val();
+        if(typeof type_chk != null && type_chk != "") {
+            $("#search_select").text($("#q_cate_txt").val());
+        }
+
+    });
+    &lt;/script&gt;
+@endsection</code></pre>
+			</div>
+		</li>
+		<li>
+			boards/index.blade.php 페이지 내 조각뷰 삽입
+			<div class="col-sm-6">
+			<pre><code class="html">&lt;div class="text-right"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-sm-5 text-left"&gt;
+            @include('boards.partial.search')   
+        &lt;/div&gt;
+        &lt;div class="col-sm-7 text-right"&gt;
+            &lt;a href="{{ route('boards.create') }}" class="btn btn-primary"&gt;&lt;i class="fa fa-bars"&gt;&lt;/i&gt; 글작성&lt;/a&gt;       
+        &lt;/div&gt;
+    &lt;/div&gt;      
+&lt;/div&gt;</code></pre>
+			</div>
+		</li>
+		<li>
+			BoardsController index 함수 수정
+			<div class="col-sm-6">
+			<pre><code class="php">public function index(Request $request)
+{   
+	<b>
+    $keyword            = $request->input('q');
+    $search_category    = $request->input('q_cate', 'both');
+	</b>
+	
+    $query = new \App\Board;
+   	<b>
+    if(!empty($keyword)) {
+        if($search_category == "title" || $search_category == "content") {
+            $query = $query->whereRaw($search_category." like '%".$keyword."%'");                
+        } else {
+            $query = $query->whereRaw("MATCH(title, content) AGAINST (?)", [$keyword]);                                
+        }
+    }
+	</b>
+    <b>$boards = $query->latest()->paginate(5);</b>
+    return view('boards.index', compact('boards'));
+}
+</code></pre>
+			</div>
+			<p>
+				1) <code class="php">public function index(Request $request)</code><br>
+				폼에서 get으로 넘어온 검색키워드 받아오기 위해 파라미터를 request로 변경<br>
+				기존에 불러왔던 <code>\App\Board</code>는 <code>$query</code>변수로 저장
+			</p>
+			<p>
+				2) <code>$keyword = $request->input('q');</code><br>
+				search.blade.php 파일 내 폼에서 검색키워드인 q필드를 가져와서 keyword 변수에 저장
+			</p>
+			<p>
+				3) <code>$search_category = $request->input('q_cate', 'both');</code><br>
+				검색 종류 필드 값을 가져와서 <code>$search_category</code> 변수에 저장하되 값이 없으면 두번째 파라미터값으로 저장
+			</p>
+			<p>
+				4) <code>if(!empty($keyword)) { ~ }</code><br>
+				<code>$search_category</code> 변수 값이 title이나 content일 경우 제목, 내용 각각 따로 검색<br>
+				both일 경우 제목, 내용 전체검색
+			</p>
+			<p>
+				5) <code>$boards = $query->latest()->paginate(5);</code><br>
+				<code>$query</code>결과를 가지고 페이징 하도록 수정
+			</p>
+		</li>
+	</ol>
+	<hr>
+	<h5>[정렬 추가]</h5>
+	<ol>
+		<li>
+			config 폴더 내 project.php 파일 생성 후 정렬선택 리스트 배열 추가<br>
+			블레이드 파일 내 추가해서 사용가능하지만 해당 파일 내 선언해놓으면 블레이드, 컨트롤러 아무데서나 전부 사용가능함. <br>
+			전역설정이 필요한 경우 해당페이지에서 추가사용가능
+			<div class="col-sm-6 mt-2">
+			<pre><code class="php">&lt;?php 
+return [
+    'sorting' =&gt; [
+        'view_count'    =&gt; '조회수',
+        'title'         =&gt; '제목순',
+        'created_at'    =&gt; '날짜순'
+    ],
+];
+?&gt;</code></pre></div>			
+		</li>
+		<li>
+			boards/index.blade.php 파일 내 정렬부분 dropdown 메뉴 추가<br>
+			<div class="col-sm-8 mt-2">
+				<pre><code class="html">&lt;div class="row"&gt;
+    &lt;div class="col-sm-5 text-left"&gt;
+        &lt;h3 class="mb-3"&gt;게시판 / 리스트&lt;/h3&gt;     
+    &lt;/div&gt;
+    &lt;div class="col-sm-7 text-right"&gt;
+        &lt;div class="dropdown mr-1"&gt;
+        &lt;button type="button" class="btn btn-secondary dropdown-toggle" id="sort_drop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" &gt;
+          &lt;i class="fa fa-sort"&gt;&lt;/i&gt; 목록정렬
+        &lt;/button&gt;
+        &lt;div class="dropdown-menu" aria-labelledby="sort_drop"&gt;
+            @foreach(config('project.sorting') as $col =&gt; $val)
+                {!! link_for_sort($col, $val) !!}
+                //$col은 view_count, title, created_at
+                //$val은 조회수, 제목순, 날짜순
+            @endforeach
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+			</div>
+			<p>
+				1) <code>@foreach(config('project.sorting') as $col =&gt; $val)</code><br>
+				project.php 파일 내 추가한 sorting값 불러와서 @foreach 문으로 한줄씩 호출<br>
+			</p>
+			<p>
+				2) <code>{!! link_for_sort($col, $val) !!}</code><br>
+				정렬리스트 호출을 도와줄 도우미 함수를 만들어서 노출
+			</p>
+		</li>
+		<li>
+			app/helpers.php 파일(없으면 생성) 내 정렬리스트 출력을 도와줄 도우미 함수 추가<br>
+			컨트롤러에 있는 함수들 외 직접 함수생성해서 사용할 수 있는데 그런 함수들을 도우미함수라고 하고 helpers.php 파일 내에서 사용가능하다.
+
+			<p>
+				<button class="btn btn-info" data-toggle="collapse" data-target="#g6_3_2_collapse" aria-expanded="false" aria-controls="g6_3_2_collapse">
+    			app/helpers.php <span class="badge badge-light">확인</span> 
+  				</button>
+  			</p>
+
+  			<div class="collapse" id="g6_3_2_collapse">
+				<div class="col-sm-6 mt-2">
+					<pre><code class="php">&lt;?php 
+if(!function_exists('link_for_sort')) {
+    function link_for_sort ($col, $val) {
+        $direc  = request()-&gt;input('order');
+        $rev    = ($direc == "desc") ? "asc" : "desc";
+		
+	/* 아이콘 추가하는 부분 [기능적으로 중요한 부분은 아님 */
+        $cla = "";
+        $ico = "";
+
+        if(request()-&gt;input('sort') == $col) {
+            $cla = " active";
+            $ico = "fa fa-sort-alpha-".$direc;
+        }
+        /* 아이콘 추가하는 부분 [기능적으로 중요한 부분은 아님 */
+
+        $queryString = http_build_query(array_merge(request()-&gt;except(['sort', 'order']), ['sort'=&gt;$col, 'order'=&gt;$rev]));
+        $link = urldecode(request()-&gt;url())."?".$queryString;
+
+        $htmls = "&lt;a class=\"dropdown-item ".$cla."\" href=\"".$link."\"&gt;&lt;i class=\"fa ".$ico."\"&gt;&lt;/i&gt; ".$val."&lt;/a&gt;";
+        return $htmls;
+    }
+}
+?&gt;</code></pre>
+				</div>
+				<p>
+					1) <code>if(!function_exists('link_for_sort')) {</code><br>
+					'link_for_sort'라는 이름의 함수가 존재하는지 체크 후 없을 경우에만 if문 실행
+				</p>
+				<p>
+					2) <code>$queryString = http_build_query(array_merge(request()->except(['sort', 'order']), ['sort'=>$col, 'order'=>$rev]));</code><br>
+					현재 URL의 쿼리스트링에서 sort, order 를 제외한 나머지들과 위에서 설정한 새로 설정된 sort, order 변수를 합친 뒤 <br>
+					새로 쿼리스트링을 만든 것
+				</p>
+				<p>
+					3) <code>$link = urldecode(request()-&gt;url())."?".$queryString;</code><br>
+					현재 URL 주소를 가져와서 새로만든 쿼리스트링과 합쳐서 정렬리스트 클릭 시 이동할 링크 생성
+				</p>
+  			</div>
+		</li>
+		<li>
+			홈페이지 로드 시 위에서 추가한 helpers.php 도우미 함수도 같이 호출하기 위해 composer.json파일 autoload 부분에 파일명 추가 
+			<div class="col-sm-5 mt-2">
+				<pre><code class="json">"autoload": {
+    "classmap": [
+        "database/seeds",
+        "database/factories"
+    ],
+    "psr-4": {
+        "App\\": "app/"
+    },
+    "files": ["app/helpers.php"]
+},</code></pre>
+			</div>
+		</li>
+		<li>
+			composer.json파일 내 수정된 내용을 반영하기 위해 콘솔창에서 composer 오토로드 갱신
+			<div class="col-sm-5 mt-2">
+				<pre><code class="console">$ composer dump-autoload –optimize</code></pre>
+			</div>
+		</li>
+	</ol>
+	
+	<hr>
+	<h5>[카테고리 추가]</h5>
+	<ol>
+		<li>
+			project.php 파일 내 카테고리 배열 추가
+			<div class="col-sm-5">
+				<pre><code class="php">'categories' => ['기본', '카테고리1', '카테고리2'],</code></pre>
+			</div>
+		</li>
+		<li>
+			boards 테이블 내 카테고리 필드를 추가하기 위한 마이그레이션 생성<br>그냥 DB툴로 추가해도 상관없음<br>
+			<div class="col-sm-5">
+				<pre><code class="php">$ php artisan make:migration add_category_on_boards_table --table=boards</code></pre>
+			</div>
+			<div class="col-sm-5">
+				<pre><code class="php">//생성된 마이그레이션 파일 
+public function up()
+{
+    Schema::table('boards', function (Blueprint $table) {
+        $table->string('category')->default(config('project.categories')[0]);
+        //project.php 에 추가한 categories 배열의 제일처음 값을 기본값으로 지정         
+    });
+}
+				</code></pre>
+			</div>
+			<div class="col-sm-5">
+				<pre><code class="php">$ php artisan migrate</code></pre>
+			</div>
+		</li>
+		<li>
+			조각뷰 form.blade.php 파일 내 카테고리 선택 셀렉트 박스 추가
+			<div class="col-sm-6">
+				<pre><code class="html">&lt;div class="form-group"  
+    &lt;label for="category"&gt;카테고리&lt;/label&gt;
+    &lt;select name="category" id="category" class="form-control"&gt;
+        @foreach(config('project.categories') as $cate) 
+        &lt;option name="{{ $cate }}" {{ ($board-&gt;category == $cate) ? 'selected' : '' }}&gt;{{ $cate }}&lt;/option&gt;
+        @endforeach
+    &lt;/select&gt;
+&lt;/div&gt;</code></pre>
+			</div>			
+		</li>
+		<li>
+			윗 부분까지 하고 글을 등록해보면 카테고리를 바꿔 선택해도 DB데이터는 카테고리가 기본으로 저장된다. <br>
+			boards 테이블 생성 후 만든 Board.php 모델에서 $fillable 배열을 사용했는데 <br>
+			새로 추가한 category 필드가 해당 배열에 없기 때문에 폼에서 넘어간 배열이 저장되지않는 것<br>
+			<div class="col-sm-6">
+				<pre><code class="php">//app/Board.php
+protected $fillable = [
+    'title', 'content', 'view_count', 'category'
+];</code></pre>
+			</div>
+		</li>
+		<li>
+			리스트에서 카테고리 노출
+			<div class="col-sm-6">
+				<pre><code class="html">//views/boards/index.blade.php
+&lt;tr&gt;
+    &lt;th scope="col"&gt;#&lt;/th&gt;
+    &lt;th scope="col"&gt;카테고리&lt;/th&gt;
+    &lt;th scope="col"&gt;제목&lt;/th&gt;             
+    &lt;th scope="col"&gt;작성자&lt;/th&gt;
+    &lt;th scope="col"&gt;날짜&lt;/th&gt;
+&lt;/tr&gt;
+...
+&lt;tr&gt;
+    &lt;td&gt;{{ $i }}&lt;/td&gt;
+    &lt;td&gt;{{ $board-&gt;category }}&lt;/td&gt;
+    &lt;td&gt;&lt;a href="{{ route('boards.show', $board-&gt;id) }}"&gt;{{ $board-&gt;title }}&lt;/a&gt;&lt;/td&gt;               
+    &lt;td&gt;{{ $board-&gt;user-&gt;name }} &lt;/td&gt;
+    &lt;td&gt;{{ $board-&gt;created_at }}&lt;/td&gt;
+&lt;/tr&gt;</code></pre>
+			</div>
+		</li>
+	</ol>
+</div>
+
+
+<!-- 파일첨부  추가  -->
+<div id="g6_4" role="tabpanel" class="tab-pane">
+	<h5>[파일첨부]</h5>
+	<ol>
+		<li>
+			첨부파일 저장될 폴더 생성 후 폴더 권한변경
+			<div class="col-sm-5">
+				<pre><code>$ mkdir public/files
+$ chmod -R 775 public/files</code></pre>
+			</div>
+		</li>
+		<li>
+			boards테이블내 첨부파일명이 들어갈 필드 추가 위해 마이그레이션 생성 후 실행<br>
+			글작성 시 파일명을 추가한 필드로 넣을것이기 때문에 app\Board.php 파일 내 $fillable 배열 내 file1 필드를 추가해야한다 
+			<div class="col-sm-5">
+				<pre><code>$ php artisan make:migration add_file1_on_boards_table --table=boards</code></pre>
+				<pre><code class="php">//생성된 마이그레이션 파일 
+public function up()
+{
+    Schema::table('boards', function (Blueprint $table) {
+        $table->string('file1')->nullable();
+    });
+}
+</code></pre>
+			</div>
+			<div class="col-sm-5">
+				<pre><code>$ php aartisan migrate</code></pre>
+			</div>
+		</li>
+		<li>
+			create.blade.php, edit.blade.php 파일 내 <code>&lt;form&gt;</code>부분 enctype 추가
+		</li>
+		<li>
+			form.blade.php 파일 내 첨부파일 인풋 추가
+			<div class="col-sm-5">
+				<pre><code class="html">&lt;div class="input-group mb-3"&gt;
+    &lt;div class="input-group-prepend"&gt;
+        &lt;span class="input-group-text"&gt;첨부파일&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="custom-file"&gt;
+        &lt;input type="file" class="custom-file-input" id="file1" name="file1[]"&gt;
+        &lt;label class="custom-file-label" for="inputGroupFile01"&gt;Choose file&lt;/label&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+			</div>
+		</li>
+		<li>
+			파일업로드 시 파일경로를 리턴해줄 도우미함수 helpers.php 파일 내 추가
+			<div class="col-sm-5">
+				<pre><code class="php">if(!function_exists('attachments_path')) {
+	function attachments_path($path = '') {
+		return public_path('files'.($path ? DIRECTORY_SEPARATOR.$path : $path));
+		//public_path() : 웹 서버 루트 디렉토리 절대경로반환
+	}
+}</code></pre>
+			</div>
+		</li>
+		<li>
+			글작성 처리 시 첨부파일 저장
+			<div class="col-sm-5">
+				<pre><code class="php">$payload = $request->all();
+if($request->hasFile('file1')) {
+    $files = $request->file('file1');
+
+    foreach($files as $file) {
+        $filename = str_random().filter_var($file->getClientOriginalName(), FILTER_SANITIZE_URL);
+        $file->move(attachments_path(), $filename);
+    }
+    $payload = array_merge($request->all(), ['file1' => $filename]);
+}
+$board = $request->user()->board()->create($payload);</code></pre>
+			</div>
+			<p>
+				1) <code>$request->hasFile('file1')</code><br>
+				폼에서 넘어온 필드 중에 file1 필드가 있는지 조회 후 if문 실행
+			</p>
+			<p>
+				2) <code>$request->file('file1');</code><br>
+				폼에서 넘어온 파일배열에서 file1 필드 별도 저장
+			</p>
+			<p>
+				3) <code>$filename = str_random().filter_var($file->getClientOriginalName(), FILTER_SANITIZE_URL);</code><br>
+				첨부파일 폴더에 저장 될 새로운 파일명을 생성. <br>
+				동일한 파일을 올릴 수 있어서 str_random() 함수로 랜덤 문자열 생성하여 앞에 추가. <br>
+				첨부파일 경로를 웹에서 접근가능한 경로로 설정하였기 때문에 <code>filter_var(mixed $variable, int $filter)</code>함수를 써서 안전하지 않은 문자는 필터링 한뒤 <br>
+				파일명을 생성한다.
+			</p>
+			<p>
+				4) <code>$file->move(attachments_path(), $filename);</code><br>
+				도우미 함수를 써서 첨부파일경로를 받아온 뒤 해당 경로로 파일 이동.
+			</p>
+			<p>
+				5) <code>$payload = array_merge($request->all(), ['file1' => $filename]);</code><br>
+				앞에서 넘어온 폼필드값들이 들어있는 $request 배열과 새로 생성한 파일명을 추가하여 payload 변수에 저장한다<br>
+				새로 추가한 file1값까지 $request->all() 배열에 추가됨.
+			</p>
+			<p>
+				6) <code>$board = $request->user()->board()->create($payload);</code><br>
+				배열을 새로 $payload 변수로 새로 저장했기때문에 글작성시 사용한 배열도 $request->all()에서 $payload로 변경
+			</p>
+		</li>
+		<li>
+			상세보기 페이지(show.blade.php) 내 첨부파일 링크 추가
+			<div class="col-sm-6">
+				<pre><code class="html">&lt;span&gt;
+    &lt;i class="fa fa-user"&gt;&lt;/i&gt;  {{ $board-&gt;user-&gt;name }} / 
+    &lt;i class="fa fa-clock-o"&gt;&lt;/i&gt;  {{ $board-&gt;created_at-&gt;diffForHumans() }} / 
+    &lt;i class="fa fa-paperclip"&gt; &lt;a href='{{ url('files/'.$board-&gt;file1) }}' target='_blank'&gt;{{ $board-&gt;file1 }}&lt;/a&gt;&lt;/i&gt;
+&lt;/span&gt;</code></pre>
+			</div>
+		</li>
+	</ol>
+</div>

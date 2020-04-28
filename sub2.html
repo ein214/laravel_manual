@@ -1,0 +1,768 @@
+<!-- 샘플홈페이지 -->
+<!-- 내장사용자인증 -->
+<div id="g5_1" role="tabpanel" class="tab-pane">
+	<h5>[라라벨 내장 사용자 인증]</h5>
+	<ol class="sub_con_list">
+		<li>
+			<p class="title">라라벨 내장 사용자 인증 실행</p>
+			<img src="assets/img/7.PNG" alt="">
+			<br>
+			<p>실행 시 아래 파일들 자동생성</p>
+			<ul>
+				<li>로그인, 회원가입, 비밀번호 초기화 관련 뷰페이지들(auth 폴더)</li>
+				<li>기본메인페이지(home.blade.php)</li>
+				<li>뷰페이지 뼈대에 해당하는 마스터 레이아웃(layouts 폴더)<br>
+					-> 폴더내에 app.blade.php 파일이 있는데 이게 전체 뷰페이지 뼈대역활. 부트스트랩 css, js까지 기본내장되어 생성됨.
+				</li>
+				<li>기본메인페이지 컨트롤러 (HomeController.php) </li>
+			</ul>
+
+			<p class="text-info">
+				메인페이지인 home이 자동생성되었기때문에 http://localhost/home 주소로 접속하면<<br>
+				로그인체크까지 자동으로 되서 로그인 페이지로 이동
+			</p>
+			<img src="assets/img/8.PNG" alt="">
+		</li>
+		<li>
+			<p class="title">.env 파일에서 기본설정 변경해주기 (홈페이지명, URL, DB정보 등)</p>
+			<div class="row">
+				<div class="col-sm-3">
+					<img src="assets/img/9.PNG" alt="">		
+				</div>
+				<div class="col-sm-6">
+					<table class="table">
+						<tbody>
+							<tr>
+								<th scope="row">APP_NAME</th>
+								<td>APP_NAME 을 변경해주면 localhost/home 접속 시 맨위 상단에 나오는 Laravel 텍스트가 변경됨.</td>
+							</tr>
+							<tr>
+								<th scope="row">APP_URL</th>
+								<td>APP_URL 홈페이지 기본 URL 설정부분</td>
+							</tr>
+							<tr>
+								<th scope="row">DB_*</th>
+								<td>여기서 설정한 DB정보를 config/database.php 파일에서 읽어가서 사용</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</li>
+		<li>
+			<p class="title">회원가입, 로그인 등 DB테이블연결하기</p>
+			<div class="col-sm-7">
+				<div class="alert alert-danger">
+					<h5>[마이그레이션]</h5> <br>
+					데이터베이스를 위한 버전관리(테이블 스키마 버전관리). <br>
+					테이블을 생성하거나 필드 추가, 삭제 등의 이력을 마이그레이션 코드로 남겨두고 필요할 때마다 마이그레이션 명령어를 실행하거나 롤백. <br>
+					마이그레이션 최초 실행 시 migrations 테이블이 자동생성되고 마이그레이션 실행 이력이 남기 때문에 여러사람이 개발하는 경우 더 좋음. <br><br>
+
+					마이그레이션 파일 생성 (테이블생성) : <code>$ php artisan make:migration create_[테이블명]_table --create=[테이블명]</code><br>
+					마이그레이션 파일 생성 (필드추가) : <code>$ php artisan make:migration add_[필드명]_on_[테이블명]_table --table=[테이블명]</code><br>
+					마이그레이션 실행 : <code>$ php artisan migrate</code><br>
+					마이그레이션 롤백 : <code>$ php artisan migrate:rollback</code><br>
+				</div>
+			</div>
+			<p>
+				database/migrations 폴더에 보면 기본적으로 내장되어 있는 users, password_resets 테이블 생성파일로 테이블을 생성한다. <br>
+				마이그레이션 파일들로 테이블 생성전에 app/Providers/AppServiceProvider.php 파일 내에서 아래와 같이 추가하고 시작해야한다.  <br>
+				참고 - 인덱스길이 & MySQL/MariaDB : <a href="https://laravel.kr/docs/5.6/migrations#creating-indexes" target="_blank">https://laravel.kr/docs/5.6/migrations#creating-indexes</a>
+			</p>
+			<img src="assets/img/10.PNG" alt="">
+			<br><br>
+			<p>추가했으면 콘솔창에서 마이그레이션 파일들 실행하기</p>
+			<img src="assets/img/11.PNG" alt="">
+			<img src="assets/img/12.PNG" alt="">
+			<p>
+				실행하고나면 테이블 3개 생성되어 있음. <br>
+				users, password_resets 테이블은 마이그레이션 파일 두개 <br>
+				migrations 테이블은 migrate 명령어 실행 시 자동으로 생성되는 테이블로 마이그레이션을 실행한 내역들이 저장된다.
+			</p>
+
+			<p>
+				<span>[참고]</span>
+				<ul>
+					<li>마이그레이션 : 	<a href="https://laravel.kr/docs/5.0/migrations" target="_blank">https://laravel.kr/docs/5.0/migrations</a></li>
+					<li>마이그레이션 파일 내 스키마 명령어 : <a href="https://laravel.kr/docs/5.0/schema">https://laravel.kr/docs/5.0/schema</a></li>
+				</ul>
+			</p>
+		</li>
+	</ol>
+</div>
+
+<!-- 게시판 기본 작업 -->
+<div id="g5_3" role="tabpanel" class="tab-pane">
+	<h5>[게시판 기본작업]</h5>
+	<div class="col-sm-7">
+		<div class="alert alert-danger">
+			<h5>[리소스 컨트롤러]</h5>
+			일반적인 CRUD 경로를 모아서 한 컨트롤러안에 자동 생성해주는 컨트롤러. <br>
+			일반 컨트롤러와 달리 생성 시 뒤에 --resource 옵션이 들어가고 리소스 컨트롤러를 생성하면<br>
+			index, create, store, show, edit, update, delete 함수들이 컨트롤러 파일 내 자동 생성되고 라우팅도 자동으로 설정된다. <br>
+			라우팅 설정파일에서도 일반 설정과는 다르게 <code>Route::resource</code>를 이용하여 호출
+			<br><br>			
+			리소스 컨트롤러 생성 : <code>$ php artisan make:controller [컨트롤러] --resource</code>
+			<hr>
+			<h5>[모델]</h5>
+			각 테이블은 각각 모델을 가지고 있으며, 모델은 컨트롤러에서 호출되어 데이터를 조작, 반환하는 역할을 함. <br>
+			테이블은 복수형으로 생성하며, 모델은 단수형으로 생성하는게 관례 (테이블이 Users라면 모델은 User) <br>
+			만약 테이블을 모델명과는 전혀 연관없는 이름으로 지정했다면 <code>$table</code> 속성으로 사용할 테이블을 지정해줘야한다. <br>
+			<code>protected $table = 'my_users';</code><br><br>				
+			마이그레이션으로 생성한 테이블이 아니라 created_at, updated_at 필드가 존재하지않는다면 <code>$timestamps</code> 값을 false로 지정해줘야한다. <br>
+			<code>public $timestamps = false;</code><br><br>			
+			마이그레이션 파일에서 관계설정을 하고 각 모델파일에서 메소드 추가를 해주면 join 없이 테이블간 연결이 가능하다. <br>
+			<code>$fillable</code> 속성(화이트리스트)은 입력가능한 값들만 지정하는 속성이고, <code>$guarded</code> 속성(블랙리스트)은 입력 불가능한 값만 지정하는 것이다. <br>
+			모든 속성이 다 입력가능하도록 하고싶으면 <code>$guarded = [];</code> guarded 속성을 빈 배열로 정의하면 된다. <br><br>			
+			기타 다른 속성 및 메소드는 공식 홈페이지 참고 : <a href="https://laravel.kr/docs/5.5/eloquent#introduction" target="_blank">https://laravel.kr/docs/5.5/eloquent#introduction</a>
+		</div>
+	</div>
+	<ol class="sub_con_list2">
+		<li>
+			콘솔창에서 <a href="https://laravel.kr/docs/5.5/controllers#resource-controllers" target="_blank">리소스 컨트롤러</a>를 사용해서 글작성,수정,리스트,상세페이지 컨트롤러 함수를 한번에 생성<br>
+			리소스 컨트롤러를 이용하면 글작성, 수정, 리스트 등에 대한 각각의 링크가 자동생성됨. <br>
+			<div class="col-sm-5">
+				<pre><code class="console">$ php artisan make:controller BoardsController <b>--resource</b></code></pre>
+			</div>
+			<br>
+			생성 후 에디터로 파일 열어보면 각각 기능에 해당하는 함수가 자동생성되어 있음.
+			<ul class="mb-3">
+				<li>index - 리스트</li>
+				<li>create - 글작성 화면 노출</li>
+				<li>store - 글작성 DB처리</li>
+				<li>show - 글 상세보기 페이지</li>
+				<li>edit - 글수정 화면 노출</li>
+				<li>update - 글수정 DB처리</li>
+				<li>destroy - 글삭제 DB처리</li>
+			</ul>
+		</li>
+		<li class="mt-5">
+			생성한 리소스 컨트롤러 파일 라우팅 설정에 추가 - routes/web.php
+			<div class="col-sm-5">
+				<pre><code class="php">Route::resource('boards', 'BoardsController');</code></pre>
+			</div>
+
+			<br>
+			추가 후 콘솔 창에서 <code>$ php artisan route:list</code> 명령어 입력 시 자동 추가된 라우팅목록 확인가능
+
+			<img src="assets/img/18.PNG" alt="">
+		</li>
+		<li class="mt-5">
+			글작성, 수정, 리스트, 상세보기 페이지들 빈페이지로 블레이드 파일 생성
+			<br>
+			<div class="row mt-3">
+				<div class="col-sm-2">
+					<img src="assets/img/19.PNG" alt="">
+				</div>
+				<div class="col-sm-9">
+					<ul>
+						<li>create.blade.php - 글작성</li>
+						<li>edit.blade.php - 글수정</li>
+						<li>index.blade.php - 리스트</li>
+						<li>show.blade.php - 상세보기</li>
+						<li>partial/form.blade.php - 글작성,수정 시 공통으로 사용하는 폼</li>
+					</ul>
+					<br>
+					<p>
+						* partial : 블레이드 파일 중 <a href="https://laravel.kr/docs/5.5/blade#including-sub-views" target="_blank">조각뷰(하위뷰)</a>가 모이는 폴더<br>
+						샘플 게시판의 경우 글작성, 글수정시에 쓰는 폼이 동일하기 때문에 조각뷰로 form.blade.php를 만들고 글작성, 글수정 페이지에서는 인클루드해서 사용.
+						뷰파일안에서는 아래와 같이 인클루드해서 사용
+						<div class="border col-sm-5 p-3 mt-2">
+							<code>@include('boards.partial.form')</code>
+						</div>
+					</p>
+				</div>
+			</div>
+		</li>
+		<li class="mt-5">
+			게시판 테이블 생성
+			<ol>
+				<li>
+					마이그레이션 파일 생성
+					<div class="col-sm-5">
+						<pre><code class="console">$ php artisan make:migration create_boards_table --create=boards</code><code>$ php artisan make:migration [파일명] --create=[테이블명]</code></pre>
+					</div>
+				</li>
+				<li class="mt-5">
+					생성된 마이그레이션 파일 수정<br>
+					artisan 명령어를 통해 생성된 파일은 database/migrations 폴더에 저장됨.
+<div class="col-sm-7">
+<pre><code class="php">public function up()
+{
+    Schema::create('boards', function (Blueprint $table) {
+        $table->increments('id');					//기본으로 추가되어있음
+        $table->string('title');
+        $table->text('content');
+        $table->tinyInteger('view_count')->nullable();
+        $table->integer('user_id')->unsigned()->index();
+        $table->timestamps();						//기본으로 추가되어있음
+        	
+        <span class="text-danger">$table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');</span>
+    });
+}</code></pre>
+</div>
+					<p>
+						<code>$table->foreign('user_id') ~ </code><br>
+						* 게시판 테이블과 미리 생성된 users 테이블 관계정의. boards 테이블의 user_id가 users 테이블의 id값을 참고한단 뜻이다. users 테이블에서 아이디가 삭제되거나, 업데이트되면 boards 테이블의 user_id 정보도 같이 수정되거나 삭제됨. <br>
+						- 마이그레이션 : <a href="https://laravel.kr/docs/5.5/migrations" target="_blank">https://laravel.kr/docs/5.5/migrations</a><br>
+						- 외래키 : <a href="https://laravel.kr/docs/5.5/migrations#foreign-key-constraints" target="_blank">https://laravel.kr/docs/5.5/migrations#foreign-key-constraints</a>
+
+					</p>
+				</li>
+				<li class="mt-5">
+					수정한 마이그레이션 파일 실행<br>실행 후 DB테이블 확인해보면 boards 테이블 생성되어 있음.
+					<div class="col-sm-5">
+						<pre><code>$ php artisan migrate</code></pre>
+					</div>
+				</li>
+				<li class="mt-5">
+					생성된 boards 테이블에 해당되는 <a href="https://laravel.kr/docs/5.5/eloquent" target="_blank">모델</a> 생성 후 관계 추가
+					<div class="col-sm-5">
+						<pre><code>$ php artisan make:model Board</code></pre>
+					</div>
+					* 생성 후 app 폴더내에 Board.php 파일이 생성되면 완료<br>	
+					* 관계 정의 시에는 관계를 정의할 대상의 모델명이 함수로 들어가야함. <br>	
+					  Board.php 파일에는 user 함수. User.php 파일에는 board 함수
+					- app/Board.php 파일
+					<div class="col-sm-5 mt-2">
+					<pre><code class="php">//App\Board.php
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Board extends Model
+{
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    <span class="text-danger">
+    protected $fillable = [
+        'title', 'content', 'view_count',
+    ];
+
+    protected $with = ['user'];
+
+    public function user() {
+    	return $this->belongsTo(User::class);
+    }
+	</span>
+}</code></pre>
+					</div>		
+					- app/User.php 파일
+					<div class="col-sm-5 mt-2">
+					<pre><code class="php">//App\User.php
+namespace App;
+
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class User extends Authenticatable
+{
+    use Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name', 'email', 'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+
+    public function board() {
+        return $this->hasMany(Board::class);
+    }
+}
+</code></pre>	
+					</div>		
+					<p>
+						1) <code>$fillable</code><br>
+						fillable 배열에 등록된 필드명만 폼을 통해 등록할 수 있음. 악의적으로 필드가 입력되는 것을 방지하기 위해 사용<br>
+						반대의미는 guarded 속성. 예를 들어 content 필드가 fillable에 없고 guarded배열에 있으면 폼에 content 필드가 있어도 DB 데이터가 인서트 되지않음.						
+					</p>
+					<p>
+						2) <code>$with = ['user'];</code><br>
+						boards 테이블 데이터를 가져올 때 user 테이블 데이터도 같이 로드하는 것. 여기저기 다 쓰면 안되고 꼭 필요한 경우에만 사용해야함. <br>
+						게시판의 경우 회원정보가 항상 필요하기 때문에 with로 불러와서 사용
+					</p>
+					<p>
+						3) <code>public function user() ~</code><br>
+						마이그레이션파일에서 boards 테이블과 users 테이블의 아이디를 서로 연결해놨기 때문에 Board.php, User.php 두개 파일에서 각각의 관계를 정의해줘야함.<br>
+						boards 테이블과 user 테이블은 한 사용자가 여러개의 게시글을 가질 수 있기 때문에 1:*(일대다) 관계<br/>
+						1에 해당하는 User.php 페이지에서는 hasMany로 Board 테이블을 연결해주고<br>
+						다에 해당하는 Board.php 페이지에서는 belongsTo로 User 테이블을 연결<br>
+						- 데이터베이스 관계 : <a href="https://laravel.kr/docs/5.5/eloquent-relationships#introduction" target="_blank">https://laravel.kr/docs/5.5/eloquent-relationships#introduction</a>
+					</p>
+				</li>
+			</ol>			
+		</li>
+	</ol>
+</div>
+
+<!-- 게시판 글작성 -->
+<div id="g5_4" role="tabpanel" class="tab-pane">
+	<h5>[게시판 기본작업 - 글작성페이지]</h5>
+	<div class="col-sm-7">
+		<div class="alert alert-danger">
+			<h5>[블레이드 문법]</h5>
+			라라벨 뷰페이지에서 쓰는 템플릿 언어. 기본 php 문법과 큰 차이없고, 블레이드 파일에서 php 문법을 써도 당연히 동작한다. <br><br>
+			PHP    : &lt;?php  ~ ?&gt;<br>
+			라라벨 : @php ~ @endphp<br>
+			라라벨에서 &lt;?php ?&gt; 형태로 써도 동작함<br><br>
+
+			PHP     : include(‘파일명’)<br>
+			라라벨  : @include(‘파일명’)<br><br>
+
+			마스터 레이아웃 인클루드<br>
+			PHP     : include(‘파일명’)<br>
+			라라벨  : @extends(‘파일명’)<br><br>
+
+			PHP    : &lt;?=$id?&gt;<br>
+			라라벨 : {{ $id }}<br><br>
+			
+			if 조건문<br>
+			PHP  : if() { } else {} <br>
+			라라벨 : @if () @else  @endif <br><br>
+
+			for 조건문 <br>
+			PHP : for(조건) { } <br>
+			라라벨 : @for(조건) ~ @endfor <br><br>
+
+			기타 블레이드 문법 참고 : <a href="https://laravel.kr/docs/5.5/blade" target="_blank">https://laravel.kr/docs/5.5/blade</a>
+		</div>
+	</div>
+	<ol>
+		<li>
+			create.blade.php 파일 내 글작성 폼 작업<br>
+			<div class="col-sm-5">
+			<pre><code class="html"><span class="text-danger">@extends('layouts.app')</span>
+@section('content')
+&lt;div class="container"&gt;
+	&lt;h3 class="mb-3"&gt;게시판 / &lt;small&gt;글작성&lt;/small&gt;&lt;/h3&gt;
+	&lt;form action="{{ route('boards.store') }}" method="post"&gt;
+		<span class="text-danger">@csrf</span>
+		<span class="text-danger">@include('boards.partial.form')</span>
+		&lt;div class="form-group text-center"&gt;
+			&lt;button type="submit" class="btn btn-primary"&gt;등록하기&lt;/button&gt;
+			&lt;a href="{{ route('boards.index') }}" class="btn btn-info"&gt;목록&lt;/a&gt;
+		&lt;/div&gt;
+	&lt;/form&gt;
+&lt;/div&gt;
+@endsection</code></pre></div>
+
+			<ul>
+				<li><code>@extends('layouts.app')</code> : 마스터 레이아웃 호출</li>
+				<li><code>@section('content') ~ @endsection</code> : content 섹션에 속한 내용이 app.blade.php 파일 내 <code>@yield('content')</code> 부분으로 인클루드된다.</li>
+				<li><code>@include('boards.partial.form')</code> : 하위 뷰로 만들어놓은 form.blade.php 파일을 인클루드</li>
+				<li><code>@csrf</code> : 폼전송 시 해킹방지를 위해서 라라벨에서 사용하는 CSRF 토큰을 hidden 필드로 포함시켜서 보내야함.<br>해당 함수를 넣고 소스보기로 확인하면 hidden 필드로 토큰값이 생성되어 있음. <a href="https://laravel.kr/docs/5.5/csrf" target="_blank">라라벨 한글 메뉴얼 CSRF 보호 참고</a></li>
+			</ul>
+			<br>
+			<p>
+				<button class="btn btn-info" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+    			form.blade.php <span class="badge badge-light">확인</span> 
+  				</button>
+  			</p>
+
+  			<div class="collapse col-sm-10" id="collapseExample">			  
+			   <pre><code class="html">&lt;div class="form-group"&gt;
+	&lt;label for="title"&gt;제목&lt;/label&gt;
+	&lt;input type="text" class="form-control <span class="text-danger">{{ $errors-&gt;has('title') ? ' is-invalid' : '' }}</span>" name="title" id="title" required <span class="text-danger">value="{{ old('title', $board-&gt;title) }}</span>"/&gt; 
+	<span class="text-danger">{!! $errors-&gt;first('title', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}</span>
+&lt;/div&gt;
+
+&lt;div class="form-group"&gt;
+	&lt;label for="content"&gt;내용&lt;/label&gt;
+	&lt;textarea name="content" id="content" class="form-control {{ $errors-&gt;has('content') ? ' is-invalid' : '' }}" cols="30" required rows="10"&gt;{{ old('content', $board-&gt;content) }}&lt;/textarea&gt;
+	{!! $errors-&gt;first('content', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}
+&lt;/div&gt;</code></pre>
+				
+				<p>
+					1) <code>{!! $errors-&gt;first('[input name|textarea name|select name]', '&lt;span class="form-error"&gt;:message&lt;/span&gt;') !!}</code><br>
+					* 폼전송 시 유효성체크에 실패하여 에러메시지가 리턴될 때 라라벨 자체적으로 제공하는 에러메시지를 사용할 수 있음.<br>
+					  폼에 사용한 각 필드의 name과 이름을 맞춰줘야함
+				</p>				
+			  	<p>
+			  		2) <code>{{ $errors-&gt;has('[input name|textarea name|select name]') ? ' is-invalid' : '' }}</code><br>
+			  		* 유효성체크에 실패하여 errors 변수에 필드명에 해당하는 이름이 있으면 is-invalid 클래스 추가. 해당 클래스가 추가되면 테두리가 빨간색으로 변경됨.
+			  	</p>
+			  	<p>
+			  		3) <code>value="{{ old('title', $board-&gt;title) }}</code><br>
+			  		<code>value="{{ old('[input name|textarea name|select name]', [수정 시 사용. DB에 입력되 있는 내용불러옴]) }}</code><br>
+					* 유효성 체크에 실패하여 페이지로 다시 돌아올경우 사용자가 입력했던 값 다시 불러오기 위한 도우미 함수. <br>
+					첫번째 인자로 받은 값이 세션에 없으면, 두번째 인자를 사용하는데 글수정페이지에서는 첫번째 인자값이 없으니 두번째 인자를 사용함.
+			  	</p>
+			</div>
+		</li>
+		<li>
+			글작성 페이지가 노출될 수 있도록 컨트롤러(BoardsController) 내 create 함수 수정<br>
+			<div class="col-sm-4"><pre><code class="php">public function create(<span class="text-danger">\App\Board $board</span>)
+{
+    return view('boards.create', <span class="text-danger">compact('board')</span>);
+}</code></pre></div>
+			<p>
+				view 함수에서 두번째값이 없이 이동하면 $board 변수가 없다는 에러가 발생한다. <br>form.blade.php 페이지 내 old 함수에서 사용하는 두번째 인자값에 해당하는 변수가 없어서 발생하기 때문에 
+				빈 값이라도 $board 변수를 같이 보내줘야 에러 안남. 
+			</p>
+		</li>
+		<li>
+			글작성 DB처리 작업<br>
+			create.blade.php 페이지 내 form action 부분이 <code>{{ route('boards.store') }}</code>로 되어있기 때문에 
+			컨트롤러(BoardsController) 에서도 store 함수 부분에 DB처리 작업을 해야한다.
+			
+			<p>
+				<button class="btn btn-info" data-toggle="collapse" data-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample2">
+    			BoardsController.php - store <span class="badge badge-light">확인</span> 
+  				</button>
+  			</p>
+
+  			<div class="collapse col-sm-5" id="collapseExample2">
+<pre><code class="php">public function __construct() {
+	//로그인을 해야만 글작성, 상세페이지를 볼 수 있도록 미들웨어 호출
+    $this->middleware('auth', ['except'=>['index']]);
+}
+
+public function store(Request $request)
+{
+    /*유효성체크*/
+    $rules = [
+        'title'      => ['required', 'max:255'],
+        'content'  => ['required', 'min:5']
+    ];
+
+    $messages = [
+        'title.required'         => '제목은 필수입력입니다.',
+        'title.max'              => '최대 255자까지 입력가능합니다.',
+        'content.required'     => '내용은 필수입력입니다.',
+        'content.min'          => '내용 최소 :min글자 이상이 필요합니다.'
+    ];
+
+    $validator = \Validator::make($request->all(), $rules, $messages);
+
+    //유효성체크 후 조건 안 맞으면 다시 이전페이지
+    if($validator->fails()) {
+        return back()->withErrors($validator)->withInput();
+    }
+
+    $board = $request->user()->board()->create($request->all());
+
+    return redirect(route('boards.index'));
+}</code></pre>
+  			</div>
+		</li>
+	</ol>
+</div>
+
+<!-- 게시판 리스트 -->
+<div id="g5_5" role="tabpanel" class="tab-pane">
+	<h5>[게시판 기본작업 - 리스트페이지]</h5>
+	<ol>
+		<li>
+			boards 테이블에서 최근순으로 데이터가져와서 뷰페이지 연결
+			<div class="col-sm-5"><pre><code class="php">//BoardsController
+public function index(\App\Board $board)
+{
+    $boards = $board->latest();
+    return view('boards.index', compact('boards'));
+}</code></pre></div>
+		</li>
+		<li>
+			게시판 리스트를 보여줄 index.blade.php 페이지 수정
+			<p>
+				<button class="btn btn-info" data-toggle="collapse" data-target="#collapseExample3" aria-expanded="false" aria-controls="collapseExample3">
+    			index.blade.php <span class="badge badge-light">확인</span> 
+  				</button>
+  			</p>
+
+  			<div class="collapse" id="collapseExample3">
+<div class="col-sm-7"><pre class="pre-scrollable"><code class="html">@extends('layouts.app')
+
+@section('content')
+&lt;div class="container"&gt;
+	&lt;h3 class="mb-3"&gt;게시판 / 리스트&lt;/h3&gt;
+	&lt;table class="table text-center"&gt;
+		&lt;thead class="thead-dark"&gt;
+			&lt;tr&gt;
+				&lt;th scope="col"&gt;#&lt;/th&gt;
+				&lt;th scope="col"&gt;제목&lt;/th&gt;				
+				&lt;th scope="col"&gt;작성자&lt;/th&gt;
+				&lt;th scope="col"&gt;날짜&lt;/th&gt;
+			&lt;/tr&gt;
+		&lt;/thead&gt;
+		&lt;tbody&gt;
+			<span class="text-danger">@foreach($boards as $board)</span>
+			&lt;tr&gt;
+				&lt;td&gt;{{ $board-&gt;id }}&lt;/td&gt;
+				&lt;td&gt;&lt;<span class="text-danger">a href="{{ route('boards.show', $board-&gt;id) }}"&gt;{{ $board-&gt;title }}&lt;/a&gt;</span>&lt;/td&gt;
+				&lt;td&gt;<span class="text-danger">{{ $board-&gt;user-&gt;name }}</span> &lt;/td&gt;
+				&lt;td&gt;{{ $board-&gt;created_at }}&lt;/td&gt;
+			&lt;/tr&gt;
+			<span class="text-danger">@endforeach</span>
+		&lt;/tbody&gt;
+	&lt;/table&gt;
+	&lt;div class="text-right"&gt;
+		&lt;a href="{{ route('boards.create') }}" class="btn btn-primary"&gt;글작성&lt;/a&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+@endsection</code></pre></div>
+			<p>
+				1) <code>@foreach ~ @endforeach</code><br>
+				* 기본적인 사용법은 php랑 비슷하지만 사용문법을 블레이드문법으로 사용해야함.
+				<a href="https://laravel.kr/docs/5.5/blade#loops" target="_blank">@foreach 참고</a>
+			</p>
+			<p>
+				2) <code>a href="{{ route('boards.show', $board-&gt;id) }}</code><br>
+				* 상세페이지 연결을 위해 라우팅연결, id값도 필수로 같이 보내줘야함.
+			</p>
+			<p>
+				3) <code>{{ $board-&gt;user-&gt;name }}</code><br>
+				Board.php 모델파일에서 User테이블을 연결해놨기 때문에 별도 작업안하고 한줄로 다른테이블에 있는 사용자 이름 가져올 수 있음.
+			</p>
+		</li>
+		<li>
+			페이징 추가하기<br>
+			라라벨은 자체적으로 페이징 처리방법을 지원하기 때문에 간단하게 처리할 수 있음.<br>
+			- 페이징 : <a href="https://laravel.kr/docs/5.5/pagination" target="_blank">https://laravel.kr/docs/5.5/pagination</a>
+			<div class="col-sm-5"><pre><code class="php">//BoardsController
+public function index(\App\Board $board)
+{
+    $boards = $board->latest()-><span class="text-danger"><b>paginate(5)</b></span>;
+    return view('boards.index', compact('boards'));
+}</code></pre>
+			</div>
+			<div class="col-sm-5"><pre><code class="html">//페이징 UI 출력하기
+//views/boards/index.blade.php
+&lt;div class="text-center"&gt;
+   <span class="text-danger">{{ $boards-&gt;render() }}</span>
+&lt;/div&gt;</code></pre>
+			</div>
+		</li>
+	</ol>
+</div>
+
+
+
+<!-- 게시판 상세보기 -->
+<div id="g5_6" role="tabpanel" class="tab-pane">
+	<h5>[게시판 기본작업 - 상세보기페이지/상단메뉴추가]</h5>
+	<ol>
+		<li>
+			상세페이지 연결 위해서 컨트롤러(BoardsController) 수정<br>
+			<div class="col-sm-5"><pre><code class="php">public function show(\App\Board $board)
+{
+    <span class="text-danger">
+    $board->view_count += 1;
+    $board->save();
+    </span>
+
+    return view('boards.show', compact('board'));
+}</code></pre>
+			</div>
+			<p>
+				1) <code>$board->view_count ~</code><br>
+				뷰페이지 접속 시 글 조회 수 저장
+			</p>
+			<p>
+				2) <code>return view('boards.show', compact('board'));</code><br>
+				상세페이지에서 게시판 글 관련 정보가 필요하기 때문에 view페이지 호출 시 변수도 같이 보냄 
+			</p>
+		</li>
+		<li>
+			상세페이지 뷰페이지 작업<br>
+			<p>
+				<button class="btn btn-info" data-toggle="collapse" data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">
+    			show.blade.php <span class="badge badge-light">확인</span> 
+  				</button>
+  			</p>
+
+  			<div class="collapse col-sm-5" id="collapseExample4">
+<pre><code class="html">@extends('layouts.app')
+
+@section('content')
+&lt;div class="container"&gt;
+    &lt;h3 class="mb-3"&gt;게시판 / &lt;small&gt;{{ $board-&gt;title }}&lt;/small&gt;   &lt;/h3&gt;
+    &lt;span&gt;{{ $board-&gt;user-&gt;name }} / {{ $board-&gt;created_at }}&lt;/span&gt;
+    &lt;hr&gt;
+    &lt;article data-id="{{ $board-&gt;id }}"&gt;
+        {{ $board-&gt;content }}
+    &lt;/article&gt;
+    &lt;hr&gt;
+    &lt;div class="text-center"&gt;
+        &lt;a href="{{ route('boards.index') }}" class="btn btn-info"&gt;글 목록&lt;/a&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+@endsection</code></pre>
+  			</div>
+		</li>
+		<li>
+			상단 메뉴에 게시판 바로가기 링크  추가
+			<p>
+				<button class="btn btn-info" data-toggle="collapse" data-target="#collapseExample5" aria-expanded="false" aria-controls="collapseExample5">
+    			layouts/app.blade.php <span class="badge badge-light">확인</span> 
+  				</button>
+  			</p>
+  			<div class="collapse col-sm-5" id="collapseExample5">
+<pre><code class="html">...
+&lt;div class="collapse navbar-collapse" id="navbarSupportedContent"&gt;
+    &lt;!-- Left Side Of Navbar --&gt;
+    &lt;ul class="navbar-nav mr-auto"&gt;
+        <span class="text-danger">&lt;li&gt;&lt;a href="{{ route('boards.index') }}" class="nav-link"&gt;게시판&lt;/a&gt;&lt;/li&gt;</span>
+    &lt;/ul&gt;
+...</code></pre>
+			</div>
+		</li>
+	</ol>
+</div>
+
+<!-- 게시판 글수정 삭제 -->
+<div id="g5_7" role="tabpanel" class="tab-pane">
+	<h5>[게시판 기본작업 - 글수정/삭제]</h5>
+	<ol>
+		<li>
+			상세페이지 내 글수정, 글삭제 버튼 추가
+<div class="col-sm-5"><pre><code class="html">&lt;div class="text-center"&gt;
+    <span class="text-danger">&lt;a href="{{ route('boards.edit', $board-&gt;id) }}" class="btn btn-primary"&gt;글 수정&lt;/a&gt;</span>
+    <span class="text-danger">&lt;button type="button" id="btn_delete" class="btn btn-danger"&gt;글 삭제&lt;/button&gt;</span>
+    &lt;a href="{{ route('boards.index') }}" class="btn btn-info"&gt;글 목록&lt;/a&gt;
+&lt;/div&gt;</code></pre>
+</div>
+			<p>
+				* 글수정버튼은 게시글 아이디와 함께 edit 라우트로 연결 <br>
+				* 글삭제버튼은 jquery로 작업해야하기때문에 <code>&lt;button&gt;</code>으로 추가
+			</p>
+		</li>
+		<li>
+			BoardsController 파일 내 edit 함수 수정
+			<div class="col-sm-5">
+				<pre><code class="php">public function edit(\App\Board $board)
+{
+    return view('boards.edit', compact('board'));
+}</code></pre>
+			</div>
+		</li>
+		<li>
+			edit.blade.php 파일 내 글 수정 폼 작업<br>
+			글작성 폼과 동일하기 때문에 create.blade.php 파일 내용을 동일하게 복사하고 action부분 수정 및 method_field 추가
+			<div class="col-sm-5">
+<pre><code class="html">@extends('layouts.app')
+
+@section('content')
+&lt;div class="container"&gt;
+    &lt;h3 class="mb-3"&gt;게시판 / &lt;small&gt;글수정&lt;/small&gt;&lt;/h3&gt;
+    &lt;form action="{{ <span class="text-danger">route('boards.update', $board-&gt;id)</span> }}" method="POST"&gt;
+        @csrf
+        <span class="text-danger">{!! method_field('PUT') !!}</span>
+        
+        <span class="text-danger">@include('boards.partial.form')</span>
+
+        &lt;div class="form-group text-center"&gt;
+            &lt;button type="submit" class="btn btn-primary"&gt;수정하기&lt;/button&gt;
+            &lt;a href="{{ route('boards.index') }}" class="btn btn-info"&gt;목록&lt;/a&gt;
+        &lt;/div&gt;
+    &lt;/form&gt;
+&lt;/div&gt;
+@endsection</code></pre>
+			</div>
+			<p>
+				1) <code>route('boards.update', $board-&gt;id)</code><br>
+				글수정시에는 BoardsController 내 update 함수를 이용하기 위해 route 수정, 두번째 인자값에 게시물 아이디가 들어가야한다.
+			</p>
+			<p>
+				2) <code>{!! method_field('PUT') !!}</code><br>	
+				<img src="assets/img/20.PNG" alt=""><br>
+				route 리스트를 확인해보면 boards.update 라우팅의 경우 Method 부분이 PUT이나 PATCH로 되어있는데, <br>
+				폼 Method를 POST로 일단 보낸 뒤 method_field 함수를 이용해서 PUT으로 변경한다. <br>
+				해당부분을 추가하고 소스보기로 확인해보면 name이 _method 인 input이 hidden으로 추가되어 있다.
+
+				<br><br>
+				* RESTful 리소스 컨트롤러 : <a href="http://l5.appkr.kr/lessons/13-restful-resource-controller.html" target="_blank">http://l5.appkr.kr/lessons/13-restful-resource-controller.html</a><br>
+				* method_field() : <a href="https://laravel.kr/docs/5.6/helpers#method-method-field" target="_blank">https://laravel.kr/docs/5.6/helpers#method-method-field</a>
+			</p>
+		</li>
+		<li>
+			BoardsController 내 update 함수 수정
+			<div class="col-sm-5">
+<pre><code class="php">public function update(Request $request, \App\Board $board)
+{
+    <span class="text-danger">$board->update($request->all());
+    return redirect(route('boards.show', $board->id));
+    </span>
+}</code></pre>
+			</div>
+			<p>
+				* boards 테이블은 make:migration 명령어로 테이블 구조를 생성하고 모델도 만들어놨기 때문에<br>
+				update() 함수만 써도 업데이트가 가능하다. $request 변수에는 앞페이지 폼에서 넘어온 데이터가 전부 들어가있음 
+			</p>
+		</li>
+
+		<li>
+			글삭제 스크립트 추가<br>
+			<span class="text-info">* app.blade.php 상단에 jquery 파일 추가 후 진행<br><code>&lt;script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" &gt;&lt;/script&gt;</code></span><br><br>
+			show.blade.php 파일 내 글 삭제버튼과 연결하여 스크립트 추가
+			<div class="col-sm-5">
+<pre><code class="jquery">@section('script')
+&lt;script&gt;
+    $(function() {
+        $('#btn_delete').click(function(e) {
+            var boardId = $('article').data('id');
+            if(confirm('글을 삭제합니다.')) {
+                $.ajax({
+                    <span class="text-danger">type: 'DELETE',</span>
+                    url : '/boards/'+boardId,
+                    <span class="text-danger">
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                    </span>
+                }).then(function() {
+                    window.location.href = '/boards';
+                });
+            }
+        });
+    });
+&lt;/script&gt;
+@endsection</code></pre>
+			</div>
+			<p>
+				<code>type: 'DELETE',</code><br>
+				3번 작업 시 확인한 라우팅 리스트에 보면 삭제하는 기능이 있는 boards.destroy 함수는 Method방식이 DELETE로 되어 있기 때문에 type 부분을 DELETE로 보낸다.
+			</p>	
+			<p>
+				<code>'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')</code><br>
+				폼 전송 시<code>@csrf</code>를 이용해서 토큰을 히든으로 넣는것처럼 ajax 이용시에도 header 부분에 토큰을 추가해주어야 한다. <br>
+				토큰 추가안하면 에러발생
+			</p>
+		</li>
+		<li>
+			글삭제 스크립트 추가 후 마스터 레이어아웃에서 content 섹션처럼 스크립트도 불러올수록 추가해줘야함. <br>
+			<code>&lt;body&gt;</code> 바로 위에 추가<br>
+			<div class="col-sm-5">
+				<pre><code>@yield('script')</code></pre>
+			</div>
+		</li>
+		<li>
+			BoardsController 내 destroy 함수 수정
+			<div class="col-sm-5">
+				<pre><code class="php">public function destroy(\App\Board $board)
+	{
+	    $board->delete();
+	    return response()->json([], 204);
+	}</code></pre>
+			</div>
+			<p>
+				1) <code>return response()->json([], 204);</code><br>	
+				json()으로 응답을 반환. json()메서드는 content-type: application/json HTTP 응답헤더를 붙이고, 첫번째 인자로 받은 배열을 json형식으로 노출한다
+			</p>
+		</li>
+	</ol>
+</div>

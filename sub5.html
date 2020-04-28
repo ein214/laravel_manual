@@ -1,0 +1,354 @@
+<!--  알림창 -->
+<div id="g7_5" role="tabpanel" class="tab-pane">
+	<h5>[알림창 추가하기 - Sweet alert]</h5>
+	<ol>
+		<li>
+			php 패키지 레지스트리인 packagist에서 sweet alert 검색 <br>
+			<a href="https://packagist.org/packages/uxweb/sweet-alert" target="_blank">https://packagist.org/packages/uxweb/sweet-alert</a>
+		</li>
+		<li>
+			composer 명령어로 sweet alert 설치
+			<div class="col-sm-5">
+				<pre><code>$ composer require uxweb/sweet-alert</code></pre>
+			</div>
+		</li>
+		<li>
+			sweetalert css, js 파일 복사<br>
+			font-awesome 설치하면서 css,js 파일을 통합했다면 복사. 아니라면 수동으로 다운로드 받아서 public css/js 폴더에 넣을 것<br>
+			해당 명령어를 실행하면 node_modules 폴더 내 sweetalert 폴더가 복사된다
+			<br>
+			<div class="col-sm-5">
+				<pre><code>$ npm install sweetalert --save-dev</code></pre>
+			</div>
+		</li>
+		<li>
+			config/app.php 파일 내 providers, aliases 배열 내 각각 추가
+			<div class="col-sm-5">
+				<pre><code class="php">'providers' => [
+    UxWeb\SweetAlert\SweetAlertServiceProvider::class,
+];
+
+'aliases' => [
+    'Alert' => UxWeb\SweetAlert\SweetAlert::class,
+];
+</code></pre>
+			</div>
+		</li>
+		<li>
+			webpack.min.js 파일 내 js 복사 추가<br>
+			node_modules폴더 내 복사된 sweetalert js 파일을 public/js 폴더로 복사<br>
+			<div class="col-sm-5">
+				<pre><code class="js">mix.js('node_modules/sweetalert/dist/sweetalert.min.js', 'public/js');</code></pre>
+			</div>
+			<span class="text-danger">원래는 mix.script 명령어로 app.js파일과 통합해야 맞지만 계속 오류나서 파일 따로 저장</span>
+		</li>
+		<li>
+			app.blade.php 파일 상단에 public/js 폴더에 만들어진 sweetalert.min.js 파일 추가<br>
+			<div class="col-sm-5">
+				<pre><code class="html">&lt;script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" &gt;&lt;/script&gt;
+&lt;script src="{{ asset('js/app.js') }}" defer&gt;&lt;/script&gt;
+&lt;script src="{{ asset('js/sweetalert.min.js') }}" &gt;&lt;/script&gt;</code></pre>
+			</div>
+		</li>
+		<li>
+			기본적인 사용법과 메시지 종류는 위의 설치페이지에서 확인. <br>
+			BoardsController 글작성 완료 부분을 알림창으로 변경
+			<div class="col-sm-5">
+				<pre><code class="php">alert()->success('글 작성이 완료되었습니다.');
+return redirect(route('boards.index'));</code></pre>
+			</div>
+			<img src="assets/img/23.png" alt="">
+		</li>
+	</ol>
+</div>
+
+<!-- 구글 OTP 연동 -->
+<div id="g7_6" role="tabpanel" class="tab-pane">
+	<h5>[Google OTP연동]</h5>
+	<div class="col-sm-5">
+		<div class="alert alert-danger">
+			<h5>OTP 연동</h5>
+			현재 큐브체인 홈페이지에서 사용한 것과는 다른버전입니다.(packagist 내 라라벨 버전이 없음) <br>
+			꼭 아래 쓰인 패키지들을 써야되는건 아니고 다른걸로도 충분히 할 수 있어요. 
+			레이 요청으로 만들어진 예시용임. <br><br>
+			
+			회원가입 -> OTP인증 -> 인증이 완료되면 글작성 가능, 인증이 안 되있다면 글 작성 불가능<br>
+			위 순서대로 진행
+		</div>
+	</div>
+	
+	<h5>[OTP 연동에 필요한 composer 설치]</h5>
+	<ol>
+		<li>
+			google2fa 패키지 설치<br>
+			<a href="https://packagist.org/packages/pragmarx/google2fa" target="_blank">https://packagist.org/packages/pragmarx/google2fa</a>
+			
+			<div class="col-sm-5">
+				<pre><code>$ composer require pragmarx/google2fa</code></pre>
+			</div>
+		</li>
+		<li>
+			인증키를 생성해서 qr코드로 만들어줄 패키지 설치<br>
+			composer.json 파일 내 아래 두줄 추가
+			<div class="col-sm-5">
+				<pre><code class="json">"require": {
+    ...
+    "bacon/bacon-qr-code": "^1.0",
+    "simplesoftwareio/simple-qrcode": "~2"
+},</code></pre>
+				
+			</div>
+		</li>
+		<li>
+			추가 후 아래 명령어 두가지 차례대로 실행
+			<div class="col-sm-5">
+				<pre><code>$ composer update
+$ composer dump-autoload --optimize</code></pre>
+			</div>
+			1) <code>composer update</code><br>
+			composer.json 파일 내 패키지들을 확인하여 버전업된 패키지는 업데이트 시키고 삭제된 패키지는 삭제하고, 추가된 패키지는 설치하는 명령어<br>
+			2) <code>$ composer dump-autoload --optimize</code><br>
+			패키지들의 캐시된 항목을 지우고 다시 로드 하는것 
+		</li>
+		<li class="pt-3">
+			config/app.php 내 qrcode에 대한 provider와 aliases 추가
+			<div class="col-sm-5">
+				<pre><code class="php">'providers' =&gt; [
+   ...
+    SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class,
+],
+
+'aliases' =&gt; [
+	...
+    'QrCode' =&gt; SimpleSoftwareIO\QrCode\Facades\QrCode::class
+],</code></pre>
+				
+			</div>
+		</li>
+	</ol>
+	<hr>
+	<h5>[OTP qrcode생성, 입력페이지 만들기]</h5>
+	<ol>
+		<li>
+			Users 테이블 내 otp secret키를 저장할 필드와 otp 인증여부를 저장할 필드 두가지 추가(마이그레이션 안하고 sql툴로 바로 추가했음.)<br>
+			otp_secret, otp_code
+		</li>
+		<li class="pt-2">
+			라우팅 파일 회원가입 부분 제일 마지막에 otp 인증 라우팅 두개 추가
+			<div class="col-sm-5">
+				<pre><code class="php">/*회원가입*/
+Route::group(['prefix'=&gt;'auth', 'as'=&gt;'user.'], function() {
+	...
+	Route::get('otp', [					//otp form 노출
+		'as'	=&gt; 'otp',
+		'uses'	=&gt; 'UsersController@otp'
+	]);
+	Route::post('otp', [				//otp form 처리로직
+		'as'	=&gt; 'otp_login',
+		'uses'	=&gt; 'UsersController@otp_login'
+	]);
+});</code></pre>				
+			</div>
+		</li>
+		<li>
+			UsersController 내 otp, otp_login 두가지 빈 function 추가
+			<div class="col-sm-5">
+				<pre><code>public function otp() {
+  
+}
+
+public function otp_login() {      
+  
+}</code></pre>
+			</div>
+		</li>
+		<li>
+			otp function내에서 호출할 otp secret key를 생성하는 함수 UsersController 내에 추가. 
+			<div class="col-sm-5">
+				<pre><code class="php">use PragmaRX\Google2FA\Google2FA;
+
+...
+
+public $google2fa;
+public function __construct() {
+  $this->google2fa = new Google2FA();
+}
+
+...
+
+public function otp_make($user) {
+  
+  $this-&gt;google2fa-&gt;setAllowInsecureCallToGoogleApis(true);
+
+  $secret   = $this-&gt;google2fa-&gt;generateSecretKey();
+  $code_url = $this-&gt;google2fa-&gt;getQRCodeUrl($user-&gt;name, $user-&gt;email, $secret);
+
+  $return_arr = array("code_url"=&gt;$code_url, "secret_key"=&gt;$secret);
+
+  $user-&gt;otp_secret = $secret;
+  $user-&gt;save();
+
+  return $return_arr;
+}					
+				</code></pre>
+			</div>
+			<p>
+				1) <code>use PragmaRX\Google2FA\Google2FA;</code><br>
+				위에서 composer를 이용해서 설치한 Google2FA 패키지 사용하겠다고 선언<br><br>
+				2) <code>public $google2fa;public function __construct() { ~ }</code><br>
+				UsersController 전체에서 사용할 수 있도록 선언<br><br>
+				3) <code>$this-&gt;google2fa-&gt;setAllowInsecureCallToGoogleApis(true);</code><br>
+				구글 OTP 인증 앱 사용여부를 true로 설정 <br><br>
+				4) <code>$secret   = $this-&gt;google2fa-&gt;generateSecretKey();</code><br>
+				secret key 생성<br><br>
+				5) <code>$code_url = $this-&gt;google2fa-&gt;getQRCodeUrl($user-&gt;name, $user-&gt;email, $secret);</code><br>
+				사용자 이름, 이메일, 생성된 secret key를 가지고 구글 OTP앱과 연결되는 qrcode url 생성<br><br>
+				6) <code>$return_arr = array("code_url"=&gt;$code_url, "secret_key"=&gt;$secret);</code><br>
+				뷰에서 secret코드도 같이 보여주기위해 qrcode url과 secret키를 배열로 리턴<br><br>
+				7) <code>$user-&gt;otp_secret = $secret; $user-&gt;save();</code><br>
+				생성된 secret키를 users 테이블에 먼저 저장
+			</p>
+		</li>
+		<li>
+			qrcode와 함께 secret키를 보여줄 otp 함수 수정
+			<div class="col-sm-5">
+				<pre><code class="php">public function otp() {
+  $user = auth()-&gt;user();
+  $code_url = $this-&gt;otp_make($user);
+
+  return view('auth.otp', compact('code_url'));
+}</code></pre>				
+			</div>
+			<p>
+				1) <code>$user = auth()-&gt;user();</code><br>
+				현재 로그인 되있는 사용자 정보를 가져옴<br><br>
+				2) <code> $code_url = $this-&gt;otp_make($user);</code><br>
+				위에서 만든 otp_make 함수를 사용해서 qrcode url하고 secret키 가져와서 뷰파일보여줄 때 같이 전달
+			</p>
+		</li>
+		<li>
+			auth 폴더 내 otp.blade.php 파일 생성
+			<div class="col-sm-6">
+				<pre><code class="html">@extends('layouts.app')
+
+@section('content')
+&lt;div class="container col-sm-4"&gt;
+	&lt;div class="card"&gt;
+		&lt;div class="card-header text-white bg-dark "&gt;
+			OTP인증
+		&lt;/div&gt;
+		&lt;div class="card-body"&gt;
+			&lt;div class="visible-print text-center"&gt;
+			    {!! QrCode::size(100)-&gt;generate($code_url["code_url"]); !!}
+			    &lt;p&gt;Secret Key : {{ $code_url["secret_key"] }}&lt;/p&gt;
+			    &lt;form action="{{ route('user.otp_login') }}" method="post" &gt;
+			    	@csrf
+			    	&lt;div class="form-group"&gt;
+			    		&lt;input type="text" class="form-control" name="otp_code" required /&gt;
+			    	&lt;/div&gt;
+			    	&lt;div class="form-group"&gt;
+			    		&lt;button type="submit" class="btn btn-primary"&gt;인증&lt;/button&gt;
+			    	&lt;/div&gt;
+			    &lt;/form&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+@endsection</code></pre>
+			</div>
+			<p>
+				1) <code>{!! QrCode::size(100)-&gt;generate($code_url["code_url"]); !!}</code><br>
+				simple-qrcode 패키지를 이용해서 otp_make로 생성된 qrcode_url로 qrcode 생성<br><br>
+				2) <code>action="{{ route('user.otp_login') }}</code><br>
+				라우팅에 설정해놓은 otp 처리로직으로 이동되도록 추가
+			</p>
+		</li>
+		<li>
+			OTP 처리로직 수정
+			<div class="col-sm-5">
+				<pre><code class="php">public function otp_login(Request $request) {      
+  $user = auth()-&gt;user();
+
+  $secret = $request-&gt;input('otp_code');
+  $isvalid  =  $this-&gt;google2fa-&gt;verifyKey($user-&gt;otp_secret, $secret);
+
+  if($isvalid == true) {
+    $user-&gt;otp_stat = "Y";
+    $user-&gt;save();
+
+    return redirect('home');
+  } else {        
+    return redirect()-&gt;back()-&gt;with('errors', '잘못된 입력코드입니다.');
+  }
+}</code></pre>
+			</div>
+			<p>
+				1) <code>$isvalid  =  $this-&gt;google2fa-&gt;verifyKey($user-&gt;otp_secret, $secret);</code><br>
+				회원테이블에 저장된 secret 코드와 사용자가 입력한 otp 인증코드로 일치여부 확인 <br>
+				일치한다면 otp_stat Y로 저장한 후 홈으로 이동
+			</p>
+		</li>
+	</ol>
+	<hr>
+	<h5>[회원가입, 글작성 페이지, 글작성 버튼수정]</h5>
+	<ol>
+		<li>
+			회원가입 완료 후 otp인증페이지로 수정 - UsersController
+			<div class="col-sm-5">
+				<pre><code class="php">public function store(Request $request) {
+	...
+   	return redirect(route('user.otp'));
+}</code></pre>
+			</div>
+		</li>
+		<li>
+			로그인시에도 인증한사람과 안한사람 구분하여 노출 - SessionsController<br>
+			<div class="col-sm-5">
+				<pre><code class="php">public function store(Request $request) {
+	$this-&gt;validate($request, [
+		'email'	=&gt; 'required|email',
+		'password' =&gt; 'required|min:6'
+	]);
+
+	if(!auth()-&gt;attempt($request-&gt;only('email', 'password'))) {
+		flash('이메일 또는 비밀번호가 맞지않습니다.');
+		return back()-&gt;withInput();
+	}
+
+    if(auth()-&gt;user()-&gt;otp_stat == "N") {
+        flash('OTP인증을 진행하세요.');
+        return redirect(route('user.otp'));
+    } else {
+    	flash('로그인 되었습니다.');
+    	return redirect('home');
+    }
+}</code></pre>
+			</div>
+		</li>
+		<li>
+			글작성 버튼 otp 인증 한 사람과 안사람 구분
+			<div class="col-sm-7">
+				<pre><code class="html">&lt;div class="col-sm-7 text-right"&gt;
+	@if((!empty($user) && $user-&gt;otp_stat == "Y") or empty($user))
+	&lt;a href="{{ route('boards.create') }}" class="btn btn-primary"&gt;&lt;i class="fa fa-bars"&gt;&lt;/i&gt; 글작성&lt;/a&gt;	
+	@else
+	&lt;a href="{{ route('user.otp', compact('user')) }}" class="btn btn-primary"&gt;&lt;i class="fa fa-bars"&gt;&lt;/i&gt; 글작성&lt;/a&gt;		
+	@endif
+&lt;/div&gt;</code></pre>
+			</div>
+		</li>
+		<li>
+			글작성 페이지로 바로 들어가는 경우에도 인증한 사람 구분 - BoardsController
+			<div class="col-sm-5">
+				<pre><code class="php">public function create(\App\Board $board)
+{
+    if(auth()->user()->otp_stat == "N") {
+        return redirect(route('user.otp'));
+    } else {
+        return view('boards.create', compact('board'));
+    }
+}</code></pre>
+			</div>
+		</li>
+	</ol>
+</div>

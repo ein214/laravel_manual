@@ -1,0 +1,52 @@
+<!--  블레이드 응용 -->
+<div id="g8" role="tabpanel" class="tab-pane">
+	<h5>[블레이드 응용]</h5>
+	<div class="col-sm-6">
+		<div class="alert alert-danger">
+			<h5>인증관련 조건걸기</h5>
+			@auth <br>
+				//로그인한 사람만 보여줄경우<br>
+			@endauth<br><br>
+
+			@guest<br>
+				//로그인 안한 사람만 보여줄 경우<br>
+			@endguest<br><br>
+
+			<h5>현재URL, 경로</h5>
+			//http://localhost/admin/member - 현재URL이 다음 주소일때<br>
+			//현재 라우팅 경로<br>
+			@php <br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo Request::path();	// admin/member 출력<br>
+		 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo Request::url();	// http://localhost/admin/member<br>
+			@endphp<br><br>
+			//라우팅경로에 따라 조건이 필요할때 <br>
+			&lt;li class="nav-item {{ Request::is('admin/member') ? 'active' : '' }}"&gt;<br>
+			- 현재 경로가 admin/member 이면 active 클래스 추가하라는것 
+		</div>
+	</div>
+</div>
+
+<!--  세션 -->
+<div id="g9" role="tabpanel" class="tab-pane">
+	<h5>[세션]</h5>
+	<div class="col-sm-6">
+		<div class="alert alert-danger">
+			<h5>컨트롤러안에서 세션굽기/조회/삭제</h5>
+			<pre><code class="php">use Illuminate\Http\Request;
+function test(Request $request) {
+	$request-&gt;session()-&gt;put('switch', $lang);	//세션굽기
+	$test1 = \Session::get('switch');		//세션조회1
+	$test2 = session('switch');			//세션조회2
+
+	$request-&gt;session()-&gt;forget('switch');		//switch 세션삭제
+
+	$request-&gt;session()-&gt;flush();			//모든세션삭제
+
+	//세션에 아이템이 존재하는지 확인
+	if ($request-&gt;session()-&gt;has('switch')) {
+	    //
+	}
+}</code></pre>
+		</div>
+	</div>
+</div>
